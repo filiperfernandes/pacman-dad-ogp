@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pacman", "pacman\pacman.csproj", "{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{83EED692-BB0C-4008-A3A4-FABA3CA398AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{F22FF374-D035-4A14-9A71-B0BC935BC225}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +19,19 @@ Global
 		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F22FF374-D035-4A14-9A71-B0BC935BC225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F22FF374-D035-4A14-9A71-B0BC935BC225}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F22FF374-D035-4A14-9A71-B0BC935BC225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F22FF374-D035-4A14-9A71-B0BC935BC225}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96D1CBF6-92B8-4891-97D6-F49328A51045}
 	EndGlobalSection
 EndGlobal

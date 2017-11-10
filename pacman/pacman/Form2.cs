@@ -12,10 +12,21 @@ using System.Runtime.Serialization.Formatters;
 using System.Net.Sockets;
 using System.Net;
 
+namespace pacman
+{
+    public partial class Form2 : Form
+    {
+        public Form2()
+        {
+            InitializeComponent();
+        }
 
-namespace pacman {
-    static class Program {
-        private static int FreeTcpPort()
+        private void Form2_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private int FreeTcpPort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
@@ -24,15 +35,12 @@ namespace pacman {
             return port;
         }
 
-
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main() {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+        private void button1_Click(object sender, EventArgs e)
+        {
+            
+            int port = FreeTcpPort();
+            var form1 = new Form1(port);
+            form1.Show();
         }
     }
 }

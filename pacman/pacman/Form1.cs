@@ -1,23 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-
+using RemotingInterfaces;
+using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Net.Sockets;
+using System.Net;
+using System.Threading;
 
 namespace pacman {
     public partial class Form1 : Form {
+
+        private IServer server;
+        private IClient client;
+        private int port;
 
         // direction player is moving in. Only one will be true
         bool goup;
         bool godown;
         bool goleft;
         bool goright;
+
+        string move;
+
 
         int boardRight = 320;
         int boardBottom = 320;
@@ -37,30 +43,68 @@ namespace pacman {
         int ghost3y = 5;            
 
         public Form1() {
+            
+            this.port = FreeTcpPort();
+            ClientServices.form = this;
+            TcpChannel chan = new TcpChannel(port);
+            ChannelServices.RegisterChannel(chan, false);
+
+            // Alternative 1 for service activation
+            ClientServices servicos = new ClientServices();
+            RemotingServices.Marshal(servicos, "Client",
+                typeof(ClientServices));
+
+            IServer server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:8086/Server");
+            ClientServices.players = server.RegisterClient(port.ToString());
+            this.server = server;
             InitializeComponent();
             label2.Visible = false;
         }
 
+        private int FreeTcpPort()
+        {
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            return port;
+        }
+
+        public void AddMsg(string s)
+        {
+            this.tbChat.AppendText("\r\n" + s);
+        }
+
         private void keyisdown(object sender, KeyEventArgs e) {
+            List<string> Moves;
+
+            string move = "";
+
+            Moves = new List<string>();
             if (e.KeyCode == Keys.Left) {
-                goleft = true;
-                pacman.Image = Properties.Resources.Left;
+                Moves.Add("goleft");
+                move = "goleft";
+              //  pacman.Image = Properties.Resources.Left;
             }
             if (e.KeyCode == Keys.Right) {
-                goright = true;
-                pacman.Image = Properties.Resources.Right;
+                Moves.Add("goright");
+                move = "goright";
+                //  pacman.Image = Properties.Resources.Right;
             }
             if (e.KeyCode == Keys.Up) {
-                goup = true;
-                pacman.Image = Properties.Resources.Up;
+                Moves.Add("goup");
+                move = "goup";
+                // pacman.Image = Properties.Resources.Up;
             }
             if (e.KeyCode == Keys.Down) {
-                godown = true;
-                pacman.Image = Properties.Resources.down;
+                Moves.Add("godown");
+                move = "godown";
+                // pacman.Image = Properties.Resources.down;
             }
             if (e.KeyCode == Keys.Enter) {
                     tbMsg.Enabled = true; tbMsg.Focus();
                }
+            server.ReadPlay(move);
         }
 
         private void keyisup(object sender, KeyEventArgs e) {
@@ -78,26 +122,39 @@ namespace pacman {
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e) {
-            label1.Text = "Score: " + score;
-
+        public void Move_Pacman (string Moves)
+        {
+            
             //move player
-            if (goleft) {
+            if (Moves == "goleft")
+            {
+                
                 if (pacman.Left > (boardLeft))
                     pacman.Left -= speed;
             }
-            if (goright) {
+            if (Moves == "goright")
+            {
                 if (pacman.Left < (boardRight))
-                pacman.Left += speed;
+                    pacman.Left += speed;
             }
-            if (goup) {
+            if (Moves == "goup")
+            {
                 if (pacman.Top > (boardTop))
                     pacman.Top -= speed;
             }
-            if (godown) {
+            if (Moves == "godown")
+            {
+                
                 if (pacman.Top < (boardBottom))
                     pacman.Top += speed;
             }
+
+        }
+
+        public void timer1_Tick(object sender, EventArgs e) {
+            label1.Text = "Score: " + score;
+
+            
             //move ghosts
             redGhost.Left += ghost1;
             yellowGhost.Left += ghost2;
@@ -160,13 +217,86 @@ namespace pacman {
 
         private void tbMsg_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
-                tbChat.Text += "\r\n" + tbMsg.Text; tbMsg.Clear(); tbMsg.Enabled = false; this.Focus();
+                IClient client = (IClient)Activator.GetObject(typeof(IClient), "tcp://localhost:"+this.port+"/Client");
+                client.SendMsg("Player" + this.port +  " : " + this.tbMsg.Text);
+                this.tbMsg.Text = null;
+                tbMsg.Enabled = false;
             }
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+    }
+
+    delegate void DelAddMsg(string mensagem);
+    delegate void DelUpdateGame(string moves);
+
+    public class ClientServices : MarshalByRefObject, IClient
+    {
+        public static Form1 form;
+        public static List<IClient> players;
+        IServer server;
+        List<string> messages;
+        List<string> moves;
+
+        public ClientServices()
+        {
+
+            players = new List<IClient>();
+            messages = new List<string>();
+        }
+
+        public void MsgToClient(string mensagem)
+        {
+            // thread-safe access to form
+            form.Invoke(new DelAddMsg(form.AddMsg), mensagem);
+        }
+
+        public void AddNewPlayer(string NewClientName)
+        {
+            IClient newPlayer =
+                (IClient)Activator.GetObject(
+                       typeof(IClient), "tcp://localhost:" + NewClientName + "/Client");
+            players.Add(newPlayer);
+        }
+
+        public void SendMsg(string mensagem)
+        {
+            messages.Add(mensagem);
+            ThreadStart ts = new ThreadStart(this.BroadcastMessage);
+            Thread t = new Thread(ts);
+            t.Start();
+        }
+
+       
+        public void UpdateGame(List<String> moves)
+        {
+            for(int i = 0; i < moves.Count; i++)
+                form.Invoke(new DelUpdateGame(form.Move_Pacman), moves[i]);
+
+        }
+
+        private void BroadcastMessage()
+        {
+            string MsgToBcast;
+            lock (this)
+            {
+                MsgToBcast = messages[messages.Count - 1];
+            }
+            for (int i = 0; i < players.Count; i++)
+            {
+                try
+                {
+                    ((IClient)players[i]).MsgToClient(MsgToBcast);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed sending message to player. Removing client. " + e.Message);
+                    players.RemoveAt(i);
+                }
+            }
         }
     }
 }
