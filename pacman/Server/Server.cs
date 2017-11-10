@@ -5,23 +5,36 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Threading;
 using System.Collections.Generic;
-
 using RemotingInterfaces;
 
 namespace Server
 {
     class Server
     {
+        public IServer server;
+        
         [STAThread]
         static void Main(string[] args)
         {
+            System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
             TcpChannel channel = new TcpChannel(8086);
             ChannelServices.RegisterChannel(channel, false);
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(ServerServices), "Server",
                 WellKnownObjectMode.Singleton);
             System.Console.WriteLine("Press <enter> to terminate chat server...");
-            System.Console.ReadLine();
+           // System.Console.ReadLine();
+            while (true)
+            {
+                if (sw.ElapsedMilliseconds == 100)
+                {
+                    IServer server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:8086/Server");
+                    server.CheckTime(true);
+                    sw.Restart();
+
+                }
+                   
+            }
         }
     }
 
@@ -30,12 +43,46 @@ namespace Server
         List<IClient> clients;
         List<string> messages;
 
+        System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
+
+        // Dictionary<IClient, List<string>> updates = new Dictionary<IClient, List<string>>();
+        List<string> updates;
+        
         ServerServices()
         {
             clients = new List<IClient>();
             messages = new List<string>();
+            updates = new List<string>();
         }
 
+        public void CheckTime(Boolean time)
+        {
+            if (time)
+            {
+                for (int i = 0; i < clients.Count; i++)
+                {
+                    try
+                    {
+                        ((IClient)clients[i]).UpdateGame(updates);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Failed sending message to client. Removing client. " + e.Message);
+                        clients.RemoveAt(i);
+                    }
+                }
+                updates.Clear();
+
+            } 
+        }
+
+        public void ReadPlay(String Moves)
+        {
+            //updates.Add(client, Moves);
+            updates.Add(Moves);
+            System.Console.WriteLine(Moves);
+            
+        }
 
         public List<IClient> RegisterClient(string NewClientName)
         {
@@ -78,18 +125,7 @@ namespace Server
             {
                 MsgToBcast = messages[messages.Count - 1];
             }
-            for (int i = 0; i < clients.Count; i++)
-            {
-                try
-                {
-                    ((IClient)clients[i]).MsgToClient(MsgToBcast);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Failed sending message to client. Removing client. " + e.Message);
-                    clients.RemoveAt(i);
-                }
-            }
+            
         }
     }
 }

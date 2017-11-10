@@ -22,6 +22,9 @@ namespace pacman {
         bool goleft;
         bool goright;
 
+        string move;
+
+
         int boardRight = 320;
         int boardBottom = 320;
         int boardLeft = 0;
@@ -73,25 +76,35 @@ namespace pacman {
         }
 
         private void keyisdown(object sender, KeyEventArgs e) {
+            List<string> Moves;
+
+            string move = "";
+
+            Moves = new List<string>();
             if (e.KeyCode == Keys.Left) {
-                goleft = true;
-                pacman.Image = Properties.Resources.Left;
+                Moves.Add("goleft");
+                move = "goleft";
+              //  pacman.Image = Properties.Resources.Left;
             }
             if (e.KeyCode == Keys.Right) {
-                goright = true;
-                pacman.Image = Properties.Resources.Right;
+                Moves.Add("goright");
+                move = "goright";
+                //  pacman.Image = Properties.Resources.Right;
             }
             if (e.KeyCode == Keys.Up) {
-                goup = true;
-                pacman.Image = Properties.Resources.Up;
+                Moves.Add("goup");
+                move = "goup";
+                // pacman.Image = Properties.Resources.Up;
             }
             if (e.KeyCode == Keys.Down) {
-                godown = true;
-                pacman.Image = Properties.Resources.down;
+                Moves.Add("godown");
+                move = "godown";
+                // pacman.Image = Properties.Resources.down;
             }
             if (e.KeyCode == Keys.Enter) {
                     tbMsg.Enabled = true; tbMsg.Focus();
                }
+            server.ReadPlay(move);
         }
 
         private void keyisup(object sender, KeyEventArgs e) {
@@ -109,26 +122,39 @@ namespace pacman {
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e) {
-            label1.Text = "Score: " + score;
-
+        public void Move_Pacman (string Moves)
+        {
+            
             //move player
-            if (goleft) {
+            if (Moves == "goleft")
+            {
+                
                 if (pacman.Left > (boardLeft))
                     pacman.Left -= speed;
             }
-            if (goright) {
+            if (Moves == "goright")
+            {
                 if (pacman.Left < (boardRight))
-                pacman.Left += speed;
+                    pacman.Left += speed;
             }
-            if (goup) {
+            if (Moves == "goup")
+            {
                 if (pacman.Top > (boardTop))
                     pacman.Top -= speed;
             }
-            if (godown) {
+            if (Moves == "godown")
+            {
+                
                 if (pacman.Top < (boardBottom))
                     pacman.Top += speed;
             }
+
+        }
+
+        public void timer1_Tick(object sender, EventArgs e) {
+            label1.Text = "Score: " + score;
+
+            
             //move ghosts
             redGhost.Left += ghost1;
             yellowGhost.Left += ghost2;
@@ -205,16 +231,19 @@ namespace pacman {
     }
 
     delegate void DelAddMsg(string mensagem);
-
+    delegate void DelUpdateGame(string moves);
 
     public class ClientServices : MarshalByRefObject, IClient
     {
         public static Form1 form;
         public static List<IClient> players;
+        IServer server;
         List<string> messages;
+        List<string> moves;
 
         public ClientServices()
         {
+
             players = new List<IClient>();
             messages = new List<string>();
         }
@@ -239,6 +268,14 @@ namespace pacman {
             ThreadStart ts = new ThreadStart(this.BroadcastMessage);
             Thread t = new Thread(ts);
             t.Start();
+        }
+
+       
+        public void UpdateGame(List<String> moves)
+        {
+            for(int i = 0; i < moves.Count; i++)
+                form.Invoke(new DelUpdateGame(form.Move_Pacman), moves[i]);
+
         }
 
         private void BroadcastMessage()
