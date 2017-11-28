@@ -12,8 +12,6 @@ namespace Server
     class Server
     {
         private static Timer myTimer;
-        // Dictionary key: round, value: players round moves
-        private static Dictionary<int, Dictionary<int, List<bool>>> allRoundsMoves;
         // Dictionary key: player gameID, value: moves of the player
         private static Dictionary<int, List<bool>> roundMoves;
         private static Dictionary<int, IClient> clients;
@@ -21,7 +19,6 @@ namespace Server
 
         public Server(int port)
         {
-            allRoundsMoves = new Dictionary<int, Dictionary<int, List<bool>>>();
             roundMoves = new Dictionary<int, List<bool>>();
             clients = new Dictionary<int, IClient>();
             ServerServices.server = this;
@@ -50,7 +47,6 @@ namespace Server
         {
             if (clients.Count > 0)
             {
-                allRoundsMoves.Add(allRoundsMoves.Count + 1, roundMoves);
                 //List of tuples with tag, name, score, xPosition and yPosition
                 List<Tuple<string, string, int, int, int>> mylist = new List<Tuple<string, string, int, int, int>>();
                 List<PacmanObject> positions = game.updateGame(roundMoves);

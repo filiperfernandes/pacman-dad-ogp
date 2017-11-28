@@ -69,6 +69,14 @@ namespace pacman {
             if (e.KeyCode == Keys.Enter) {
                 tbMsg.Enabled = true; tbMsg.Focus();
             }
+            PictureBox picture = new PictureBox
+            {
+                BackColor = System.Drawing.Color.Red,
+                Name = "pictureBox100",
+                Size = new System.Drawing.Size(100, 100),
+                Location = new System.Drawing.Point(100, 100),
+            };
+            this.Controls.Add(picture);
         }
 
         private void keyisup(object sender, KeyEventArgs e) {
@@ -84,10 +92,17 @@ namespace pacman {
             if (e.KeyCode == Keys.Down) {
                 moves[3] = false;
             }
+            foreach (Control var in this.Controls)
+            {
+                if (var is PictureBox && var.Name == "pictureBox100"){
+                    this.Controls.Remove(var);
+                }
+            }
         }
 
         private void sendMovesToServer(object sender, EventArgs myEventArgs)
         {
+            
             this.server.AddMoves(gameID, moves);
         }
         
