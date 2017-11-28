@@ -7,3 +7,15 @@ c:\users\mimi.mimi-pc\documents\visual studio 2015\Projects\pacman\pacman\obj\De
 c:\users\mimi.mimi-pc\documents\visual studio 2015\Projects\pacman\pacman\obj\Debug\pacman.csproj.GenerateResource.Cache
 c:\users\mimi.mimi-pc\documents\visual studio 2015\Projects\pacman\pacman\obj\Debug\pacman.exe
 c:\users\mimi.mimi-pc\documents\visual studio 2015\Projects\pacman\pacman\obj\Debug\pacman.pdb
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\bin\Debug\pacman.exe.config
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\bin\Debug\pacman.exe
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\bin\Debug\pacman.pdb
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\bin\Debug\Services.dll
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\bin\Debug\Services.pdb
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.csprojResolveAssemblyReference.cache
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.Form1.resources
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.Properties.Resources.resources
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.csproj.GenerateResource.Cache
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.csproj.CoreCompileInputs.cache
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.exe
+C:\Users\joaot\Downloads\pacman_mine\pacman\pacman\obj\Debug\pacman.pdb

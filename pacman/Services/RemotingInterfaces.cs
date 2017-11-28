@@ -6,10 +6,7 @@ namespace RemotingInterfaces
     public interface IServer
     {
         List<IClient> RegisterClient(string NewClientPort);
-        void CheckTime(Boolean time);
-        void SendMsg(string message);
-        void ReadPlay(String move);
-        void InformNewClientArrival(string NewClientName);
+        void AddMoves(int gameID, List<bool> moves);
     }
 
     public interface IClient
@@ -17,6 +14,7 @@ namespace RemotingInterfaces
         void MsgToClient(string message);
         void SendMsg(string message);
         void AddNewPlayer(string NewClientName);
-        void UpdateGame(List<string> Moves);
+        void SetGameID(int gameID);
+        void PlayMoves(List<Tuple<string, string, int, int, int>> myList);
     }
 }
