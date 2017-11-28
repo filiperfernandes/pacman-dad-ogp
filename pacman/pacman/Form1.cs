@@ -15,32 +15,11 @@ namespace pacman {
         private IServer server;
         private IClient client;
         private int port;
+        private int gameID = 0;
+        List<bool> moves = new List<bool>(new bool[4]);
 
-        // direction player is moving in. Only one will be true
-        bool goup;
-        bool godown;
-        bool goleft;
-        bool goright;
-
-        string move;
-
-
-        int boardRight = 320;
-        int boardBottom = 320;
-        int boardLeft = 0;
-        int boardTop = 40;
-        //player speed
-        int speed = 5;
-
-        int score = 0; int total_coins = 61;
-
-        //ghost speed for the one direction ghosts
-        int ghost1 = 5;
-        int ghost2 = 5;
-        
-        //x and y directions for the bi-direccional pink ghost
-        int ghost3x = 5;
-        int ghost3y = 5;            
+        int total_coins = 60;
+     
 
         public Form1() {
             
@@ -54,9 +33,9 @@ namespace pacman {
             RemotingServices.Marshal(servicos, "Client",
                 typeof(ClientServices));
 
-            IServer server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:8086/Server");
+            this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:8086/Server");
+            this.client = (IClient)Activator.GetObject(typeof(IClient), "tcp://localhost:" + this.port + "/Client");
             ClientServices.players = server.RegisterClient(port.ToString());
-            this.server = server;
             InitializeComponent();
             label2.Visible = false;
         }
@@ -70,115 +49,89 @@ namespace pacman {
             return port;
         }
 
-        public void AddMsg(string s)
-        {
-            this.tbChat.AppendText("\r\n" + s);
-        }
-
         private void keyisdown(object sender, KeyEventArgs e) {
-            List<string> Moves;
-
-            string move = "";
-
-            Moves = new List<string>();
             if (e.KeyCode == Keys.Left) {
-                Moves.Add("goleft");
-                move = "goleft";
-              //  pacman.Image = Properties.Resources.Left;
+                moves[0] = true;
+                pacman.Image = Properties.Resources.Left;
             }
             if (e.KeyCode == Keys.Right) {
-                Moves.Add("goright");
-                move = "goright";
-                //  pacman.Image = Properties.Resources.Right;
+                moves[1] = true;
+                pacman.Image = Properties.Resources.Right;
             }
             if (e.KeyCode == Keys.Up) {
-                Moves.Add("goup");
-                move = "goup";
-                // pacman.Image = Properties.Resources.Up;
+                moves[2] = true;
+                pacman.Image = Properties.Resources.Up;
             }
             if (e.KeyCode == Keys.Down) {
-                Moves.Add("godown");
-                move = "godown";
-                // pacman.Image = Properties.Resources.down;
+                moves[3] = true;
+                pacman.Image = Properties.Resources.down;
             }
             if (e.KeyCode == Keys.Enter) {
-                    tbMsg.Enabled = true; tbMsg.Focus();
-               }
-            server.ReadPlay(move);
+                tbMsg.Enabled = true; tbMsg.Focus();
+            }
         }
 
         private void keyisup(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Left) {
-                goleft = false;
+                moves[0] = false;
             }
             if (e.KeyCode == Keys.Right) {
-                goright = false;
+                moves[1] = false;
             }
             if (e.KeyCode == Keys.Up) {
-                goup = false;
+                moves[2] = false;
             }
             if (e.KeyCode == Keys.Down) {
-                godown = false;
+                moves[3] = false;
             }
         }
 
-        public void Move_Pacman (string Moves)
+        private void sendMovesToServer(object sender, EventArgs myEventArgs)
         {
-            
-            //move player
-            if (Moves == "goleft")
-            {
-                
-                if (pacman.Left > (boardLeft))
-                    pacman.Left -= speed;
-            }
-            if (Moves == "goright")
-            {
-                if (pacman.Left < (boardRight))
-                    pacman.Left += speed;
-            }
-            if (Moves == "goup")
-            {
-                if (pacman.Top > (boardTop))
-                    pacman.Top -= speed;
-            }
-            if (Moves == "godown")
-            {
-                
-                if (pacman.Top < (boardBottom))
-                    pacman.Top += speed;
-            }
-
+            this.server.AddMoves(gameID, moves);
         }
+        
+        public void timer1_Tick(List<Tuple<string, string, int, int, int>> myList)
+        {
+            foreach (Tuple<string, string, int, int, int> pacmanObject in myList)
+            {
+                if (pacmanObject.Item1 == "pacman")
+                {
+                    if(pacmanObject.Item2 == this.gameID.ToString())
+                    {
+                        label1.Text = "Score: " + pacmanObject.Item3;
+                        /*if (pacmanObject.Item3 == total_coins)
+                        {
+                            label2.Text = "GAME WON!";
+                            label2.Visible = true;
+                            timer1.Stop();
+                        }*/
+                        pacman.Location = new System.Drawing.Point(pacmanObject.Item4, pacmanObject.Item5);
+                    }
+                }
 
-        public void timer1_Tick(object sender, EventArgs e) {
-            label1.Text = "Score: " + score;
-
-            
-            //move ghosts
-            redGhost.Left += ghost1;
-            yellowGhost.Left += ghost2;
-
-            // if the red ghost hits the picture box 4 then wereverse the speed
-            if (redGhost.Bounds.IntersectsWith(pictureBox1.Bounds))
-                ghost1 = -ghost1;
-            // if the red ghost hits the picture box 3 we reverse the speed
-            else if (redGhost.Bounds.IntersectsWith(pictureBox2.Bounds))
-                ghost1 = -ghost1;
-            // if the yellow ghost hits the picture box 1 then wereverse the speed
-            if (yellowGhost.Bounds.IntersectsWith(pictureBox3.Bounds))
-                ghost2 = -ghost2;
-            // if the yellow chost hits the picture box 2 then wereverse the speed
-            else if (yellowGhost.Bounds.IntersectsWith(pictureBox4.Bounds))
-                ghost2 = -ghost2;
+                else if (pacmanObject.Item1 == "ghost")
+                {
+                    if (pacmanObject.Item2 == "pinkGhost")
+                    {
+                        pinkGhost.Location = new System.Drawing.Point(pacmanObject.Item4, pacmanObject.Item5);
+                    }
+                    else if (pacmanObject.Item2 == "redGhost")
+                    {
+                        redGhost.Location = new System.Drawing.Point(pacmanObject.Item4, pacmanObject.Item5);
+                    }
+                    else if (pacmanObject.Item2 == "yellowGhost")
+                    {
+                        yellowGhost.Location = new System.Drawing.Point(pacmanObject.Item4, pacmanObject.Item5);
+                    }
+                }
+            }
             //moving ghosts and bumping with the walls end
             //for loop to check walls, ghosts and points
             foreach (Control x in this.Controls) {
                 // checking if the player hits the wall or the ghost, then game is over
                 if (x is PictureBox && x.Tag == "wall" || x.Tag == "ghost") {
                     if (((PictureBox)x).Bounds.IntersectsWith(pacman.Bounds)) {
-                        pacman.Left = 0;
-                        pacman.Top = 25;
                         label2.Text = "GAME OVER";
                         label2.Visible = true;
                         timer1.Stop();
@@ -187,38 +140,30 @@ namespace pacman {
                 if (x is PictureBox && x.Tag == "coin") {
                     if (((PictureBox)x).Bounds.IntersectsWith(pacman.Bounds)) {
                         this.Controls.Remove(x);
-                        score++;
                         //TODO check if all coins where "eaten"
-                        if (score == total_coins) {
-                            //pacman.Left = 0;
-                            //pacman.Top = 25;
+                        /*if (score == total_coins) {
                             label2.Text = "GAME WON!";
                             label2.Visible = true;
                             timer1.Stop();
-                            }
+                        }*/
                     }
                 }
             }
-                pinkGhost.Left += ghost3x;
-                pinkGhost.Top += ghost3y;
+        }
 
-                if (pinkGhost.Left < boardLeft ||
-                    pinkGhost.Left > boardRight ||
-                    (pinkGhost.Bounds.IntersectsWith(pictureBox1.Bounds)) ||
-                    (pinkGhost.Bounds.IntersectsWith(pictureBox2.Bounds)) ||
-                    (pinkGhost.Bounds.IntersectsWith(pictureBox3.Bounds)) ||
-                    (pinkGhost.Bounds.IntersectsWith(pictureBox4.Bounds))) {
-                    ghost3x = -ghost3x;
-                }
-                if (pinkGhost.Top < boardTop || pinkGhost.Top + pinkGhost.Height > boardBottom - 2) {
-                    ghost3y = -ghost3y;
-                }
+        public void AddMsg(string s)
+        {
+            this.tbChat.AppendText("\r\n" + s);
+        }
+
+        public void SetGameID(int gameID)
+        {
+            this.gameID = gameID;
         }
 
         private void tbMsg_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
-                IClient client = (IClient)Activator.GetObject(typeof(IClient), "tcp://localhost:"+this.port+"/Client");
-                client.SendMsg("Player" + this.port +  " : " + this.tbMsg.Text);
+                client.SendMsg("Player" + this.gameID +  ": " + this.tbMsg.Text);
                 this.tbMsg.Text = null;
                 tbMsg.Enabled = false;
             }
@@ -231,19 +176,18 @@ namespace pacman {
     }
 
     delegate void DelAddMsg(string mensagem);
-    delegate void DelUpdateGame(string moves);
+    delegate void DelSetGameID(int gameID);
+    delegate void DelDoRound(List<Tuple<string, string, int, int, int>> myList);
+
 
     public class ClientServices : MarshalByRefObject, IClient
     {
         public static Form1 form;
         public static List<IClient> players;
-        IServer server;
         List<string> messages;
-        List<string> moves;
 
         public ClientServices()
         {
-
             players = new List<IClient>();
             messages = new List<string>();
         }
@@ -262,20 +206,18 @@ namespace pacman {
             players.Add(newPlayer);
         }
 
+        public void SetGameID(int gameID)
+        {
+            DelSetGameID delGameID = new DelSetGameID(form.SetGameID);
+            delGameID(gameID);
+        }
+
         public void SendMsg(string mensagem)
         {
             messages.Add(mensagem);
             ThreadStart ts = new ThreadStart(this.BroadcastMessage);
             Thread t = new Thread(ts);
             t.Start();
-        }
-
-       
-        public void UpdateGame(List<String> moves)
-        {
-            for(int i = 0; i < moves.Count; i++)
-                form.Invoke(new DelUpdateGame(form.Move_Pacman), moves[i]);
-
         }
 
         private void BroadcastMessage()
@@ -297,6 +239,12 @@ namespace pacman {
                     players.RemoveAt(i);
                 }
             }
+        }
+
+        public void PlayMoves(List<Tuple<string, string, int, int, int>> myList)
+        {
+            DelDoRound delDoRound = new DelDoRound(form.timer1_Tick);
+            delDoRound(myList);
         }
     }
 }

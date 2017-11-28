@@ -15,15 +15,6 @@ using System.Net;
 
 namespace pacman {
     static class Program {
-        private static int FreeTcpPort()
-        {
-            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
-            l.Start();
-            int port = ((IPEndPoint)l.LocalEndpoint).Port;
-            l.Stop();
-            return port;
-        }
-
 
         /// <summary>
         /// The main entry point for the application.
