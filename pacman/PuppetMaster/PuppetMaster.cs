@@ -2,16 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace PuppetMaster
+namespace pacman
 {
     class PuppetMaster
     {
+
+        public static string ext_pid;
+        static Thread th;
+        static ThreadStart ths;
         static void Main()
         {
-            readConsole();
-            System.Console.ReadLine();
+
+            while (true) { readConsole(); };
+            //readConsole();
+            //System.Console.ReadLine();
+        }
+
+        private static void testStuff()
+        {    
+            Console.WriteLine("Alive");
         }
 
         static private void readConsole()
@@ -24,49 +36,59 @@ namespace PuppetMaster
             switch (words[0])
             {
                 case "StartClient":
-                    cmdStartClient(Int32.Parse(words[1]), words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[4]));
+                    cmdStartClient(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]));
                     break;
-                case "StartServer:":
-                    cmdStartServer(Int32.Parse(words[1]), words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[4]));
+                case "StartServer":
+                    cmdStartServer(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]));
                     break;
                 case "GlobalStatus":
                     cmdGlobalStatus();
                     break;
                 case "Crash":
-                    cmdCrash(Int32.Parse(words[1]));
+                    cmdCrash(words[1]);
                     break;
                 case "Freeze":
-                    cmdFreeze(Int32.Parse(words[1]));
+                    cmdFreeze(words[1]);
                     break;
                 case "Unfreeze":
-                    cmdUnfreeze(Int32.Parse(words[1]));
+                    cmdUnfreeze(words[1]);
                     break;
                 case "InjectDelay":
-                    cmdInjectDelay(Int32.Parse(words[1]), Int32.Parse(words[2]));
+                    cmdInjectDelay(words[1], words[2]);
                     break;
                 case "LocalState":
-                    cmdLocalState(Int32.Parse(words[1]), Int32.Parse(words[2]));
+                    cmdLocalState(words[1], Int32.Parse(words[2]));
                     break;
                 case "Wait":
                     cmdWait(Int32.Parse(words[1]));
+                    break;
+                default:
+                    Console.WriteLine("Command not found!");
                     break;
             }
 
         }
 
-        static private void cmdStartClient(int pid, string pcs_url, string client_url, int msec_per_round, int num_players)
+        static private void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
         {
             Console.WriteLine("Starting Client");
+            ext_pid = pid;
 
-            //int pid = Int32.Parse(words[1]);
-            //string pcs_url = words[2];
-            //string client_url = args[2];
-            //int msec_per_round = Int32.Parse(args[3]);
-            //int num_players = Int32.Parse(args[4]);
+            Console.WriteLine("EXT is: " + ext_pid);
+
+            Stuff test = new Stuff();
+            test.pid = "pid";
+            ths = new ThreadStart(test.main);
+            th = new Thread(ths);
+            th.Start();
+            Thread.Sleep(1000);
+            Console.WriteLine("Main thread ({0}) exiting...",
+                              Thread.CurrentThread.ManagedThreadId);
+
 
         }
 
-        static private void cmdStartServer(int pid, string pcs_url, string client_url, int msec_per_round, int num_players)
+        static private void cmdStartServer(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
         {
             Console.WriteLine("Starting Server");
 
@@ -75,33 +97,47 @@ namespace PuppetMaster
         static private void cmdGlobalStatus()
         {
             Console.WriteLine("Global Status");
+            Console.WriteLine(th.ThreadState);
         }
 
-        static private void cmdCrash(int pid)
+        static private void cmdCrash(string pid)
         {
             Console.WriteLine("Crashing");
 
+            try
+            {
+                //th.ResetAbort();
+                th.Abort();
+            }
+            catch (ThreadAbortException)
+            {
+                Console.WriteLine("Abort!");
+            }
+            
+
         }
 
-        static private void cmdFreeze(int pid)
+        static private void cmdFreeze(string pid)
         {
             Console.WriteLine("Freezing");
-
+            th.Suspend();
+       
         }
 
-        static private void cmdUnfreeze(int pid)
+        static private void cmdUnfreeze(string pid)
         {
             Console.WriteLine("Starting CLient");
+            th.Resume();
 
         }
 
-        static private void cmdInjectDelay(int src_pid, int dst_pid)
+        static private void cmdInjectDelay(string src_pid, string dst_pid)
         {
             Console.WriteLine("Injecting Delay");
 
         }
 
-        static private void cmdLocalState(int pid, int round_pid)
+        static private void cmdLocalState(string pid, int round_id)
         {
             Console.WriteLine("LocalState");
 
@@ -115,7 +151,16 @@ namespace PuppetMaster
 
             System.Threading.Thread.Sleep(x_ms);
 
-            Console.WriteLine("olaola");
+        }
+    }
+
+    class Stuff
+    {
+        public string pid { get; set; }
+
+        public void main()
+        {
+            Console.WriteLine(pid);
         }
     }
 }
