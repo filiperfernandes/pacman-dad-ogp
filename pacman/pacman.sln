@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pacman", "pacman\pacman.csproj", "{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F22FF374-D035-4A14-9A71-B0BC935BC225} = {F22FF374-D035-4A14-9A71-B0BC935BC225}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{83EED692-BB0C-4008-A3A4-FABA3CA398AE}"
 EndProject
