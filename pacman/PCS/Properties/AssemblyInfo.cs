@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PuppetMaster")]
+[assembly: AssemblyTitle("PCS")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Vagrant")]
-[assembly: AssemblyProduct("PuppetMaster")]
+[assembly: AssemblyProduct("PCS")]
 [assembly: AssemblyCopyright("Copyright © Vagrant 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("58396029-db79-466d-b5b0-7b9fbbecb1e8")]
+[assembly: Guid("4e483b22-39f2-4f55-93d7-5b643441bb30")]
 
 // Version information for an assembly consists of the following four values:
 //

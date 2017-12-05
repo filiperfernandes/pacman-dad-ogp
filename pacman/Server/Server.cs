@@ -6,10 +6,11 @@ using System.Timers;
 using System.Collections.Generic;
 
 using RemotingInterfaces;
+using System.Diagnostics;
 
-namespace Server
+namespace pacman
 {
-    class Server
+    public class Server
     {
         private static Timer enoughPlayersTimer;
         private static Timer myTimer;
@@ -28,6 +29,11 @@ namespace Server
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(ServerServices), "Server",
                 WellKnownObjectMode.Singleton);
+        }
+
+        public static string exe_path()
+        {
+            return @Environment.CurrentDirectory + "/Server.exe";
         }
 
         [STAThread]
@@ -212,6 +218,12 @@ namespace Server
         {
             DelAddMoves delAddMoves = new DelAddMoves(server.AddMoves);
             delAddMoves(gameID, moves);
+        }
+
+        public void Crash()
+        {
+            Console.WriteLine("Aqui");
+            Process.GetCurrentProcess().Kill();
         }
     }
 

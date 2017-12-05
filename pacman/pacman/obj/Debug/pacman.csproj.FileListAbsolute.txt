@@ -31,3 +31,14 @@ C:\Users\joaot\OneDrive\Documentos\GitHub\pacman-dad-ogp\pacman\pacman\obj\Debug
 C:\Users\joaot\OneDrive\Documentos\GitHub\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.csproj.CoreCompileInputs.cache
 C:\Users\joaot\OneDrive\Documentos\GitHub\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.exe
 C:\Users\joaot\OneDrive\Documentos\GitHub\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.pdb
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\bin\Debug\pacman.exe.config
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\bin\Debug\pacman.exe
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\bin\Debug\pacman.pdb
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\bin\Debug\Services.dll
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\bin\Debug\Services.pdb
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.Form1.resources
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.Properties.Resources.resources
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.csproj.GenerateResource.Cache
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.exe
+C:\Users\Administrator\Desktop\pacman-dad-ogp\pacman\pacman\obj\Debug\pacman.pdb

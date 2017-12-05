@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Channels;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Diagnostics;
 
 namespace pacman {
     public partial class Form1 : Form {
@@ -306,6 +307,12 @@ namespace pacman {
             form.Invoke(new DelSetInitialGame(form.setInitialGame), myList);
             //DelSetInitialGame delSetInitialGame = new DelSetInitialGame(form.setInitialGame);
             //delSetInitialGame(myList);
+        }
+
+        public void Crash()
+        {
+            Console.WriteLine("Aqui");
+            Process.GetCurrentProcess().Kill();
         }
     }
 }
