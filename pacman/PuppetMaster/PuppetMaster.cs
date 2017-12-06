@@ -22,6 +22,8 @@ namespace pacman
         private static Dictionary<string, string> pidToUrl = new Dictionary<string, string>();
         private static List<string> pcsList = new List<string>();
         private static Dictionary<string, IPCS> pcs = new Dictionary<string, IPCS>();
+        private static List<string> activeServer = new List<string>();
+        private static List<string> activeClient = new List<string>();
         static IPCS remote;
 
 
@@ -107,10 +109,11 @@ namespace pacman
             Console.WriteLine("Starting Client" + client_url);
 
             pidToUrl.Add(pid, client_url);
+            activeClient.Add(client_url);
 
-            Console.WriteLine("Checking for pcs");
-            checkPCS(pcs_url);
-            Console.WriteLine(pcs_url);
+            //Console.WriteLine("Checking for pcs");
+            //checkPCS(pcs_url);
+            //Console.WriteLine(pcs_url);
 
             Console.WriteLine("Checking for pcs");
             remote = checkPCS(pcs_url);
@@ -125,6 +128,7 @@ namespace pacman
             Console.WriteLine("Starting Server" + server_url);
 
             pidToUrl.Add(pid, server_url);
+            activeServer.Add(server_url);
 
             Console.WriteLine("Checking for pcs");
             remote = checkPCS(pcs_url);
@@ -137,7 +141,29 @@ namespace pacman
         static private void cmdGlobalStatus()
         {
             Console.WriteLine("Global Status");
-            Console.WriteLine(th.ThreadState);
+            //Console.WriteLine(th.ThreadState);
+
+            Replica r = new Replica();
+
+            int s = 1;
+            int c = 1;
+            string active = "";
+            string inactive = "";
+            foreach (var s_url in activeServer)
+            {
+                if (r.CheckServer(s_url)==1) { active += " S" + s; }
+                else { inactive += " S" + s; }
+                s += 1;
+            }
+            foreach (var c_url in activeClient)
+            {
+                if (r.CheckClient(c_url) == 1) { active += " C" + c; }
+                else { inactive += " C" + c; }
+                c += 1;
+            }
+
+            Console.WriteLine("Everything okay with: " + active);
+            Console.WriteLine("Might be down: " + inactive);
         }
 
         private static void cmdCrash(string pid)

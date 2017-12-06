@@ -39,6 +39,7 @@ namespace pacman
             Process p = Process.Start(info);
 
             urlToPid.Add(repl_url,p.Id);
+            
         }
 
 
@@ -76,5 +77,48 @@ namespace pacman
         {
             throw new NotImplementedException();
         }
+
+        public int CheckServer(string url)
+        {
+            char[] delimiterChars = { ':', '/' };
+            string[] words = url.Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+            IServer remote = RemotingServices.Connect(typeof(IServer),
+                "tcp://localhost:" + port + "/Server") as IServer;
+
+            try
+            {
+                int response = remote.isAlive();
+                if (response == 1) { return 1; }
+                else { return 0; }
+            }
+            catch (Exception ex) { };
+            return 0;
+        }
+
+        public int CheckClient(string url)
+        {
+            char[] delimiterChars = { ':', '/' };
+            string[] words = url.Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+            IClient remote = RemotingServices.Connect(typeof(IClient),
+                "tcp://localhost:" + port + "/Client") as IClient;
+
+            try
+            {
+                int response = remote.isAlive();
+                if (response == 1) { return 1; }
+                else { return 0; }
+            }
+            catch (Exception ex) { };
+            return 0;
+        }
+
     }
 }

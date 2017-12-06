@@ -87,6 +87,10 @@
       <Project>{4e483b22-39f2-4f55-93d7-5b643441bb30}</Project>
       <Name>PCS</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Replica\Replica.csproj">
+      <Project>{74beebb3-1d84-44e0-8af7-cb10e4649238}</Project>
+      <Name>Replica</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Services\Services.csproj">
       <Project>{83eed692-bb0c-4008-a3a4-faba3ca398ae}</Project>
       <Name>Services</Name>

@@ -321,5 +321,10 @@ namespace pacman {
             Form1.ActiveForm.Close();
             Process.GetCurrentProcess().Kill();
         }
+
+        public int isAlive()
+        {
+            return 1;
+        }
     }
 }
