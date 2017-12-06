@@ -43,13 +43,7 @@ namespace pacman
 
 
         }
-        //PCS pcs = new PCS();
 
-
-        //Copy from old PupperMaster Console App
-        public static string ext_pid;
-        static Thread th;
-        static ThreadStart ths;
         //static void Main()
         //{
         //    System.Console.WriteLine("Cheguei");
@@ -112,10 +106,6 @@ namespace pacman
 
             pidToUrl.Add(pid, client_url);
             activeClient.Add(client_url);
-
-            //Console.WriteLine("Checking for pcs");
-            //checkPCS(pcs_url);
-            //Console.WriteLine(pcs_url);
 
             Console.WriteLine("Checking for pcs");
             remote = checkPCS(pcs_url);
@@ -222,7 +212,6 @@ namespace pacman
         static public void cmdUnfreeze(string pid)
         {
             Console.WriteLine("Starting CLient");
-            th.Resume();
 
         }
 

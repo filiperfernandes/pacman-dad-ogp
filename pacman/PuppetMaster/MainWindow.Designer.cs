@@ -230,8 +230,8 @@
         private System.Windows.Forms.Button btn_localstate;
         private System.Windows.Forms.Button btn_run_command;
         private System.Windows.Forms.Button btn_load;
-        private System.Windows.Forms.TextBox input_box;
-        private System.Windows.Forms.TextBox file_box;
+        public System.Windows.Forms.TextBox input_box;
+        public System.Windows.Forms.TextBox file_box;
         public System.Windows.Forms.TextBox output_box;
         private System.Windows.Forms.Button btn_next_command;
     }
