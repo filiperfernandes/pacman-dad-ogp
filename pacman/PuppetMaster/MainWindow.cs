@@ -17,7 +17,7 @@ namespace pacman
         {
             InitializeComponent();
         }
-
+        
         private void MainWindow_Load_1(object sender, EventArgs e)
         {
            // AllocConsole();
@@ -38,48 +38,32 @@ namespace pacman
 
         }
 
-        private void btn_local_state_Click(object sender, EventArgs e)
-        {
-
-        }
-
        
-
-        private void btn_global_status_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void btn_load_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void btn_runcommand_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        
-
+       
         private void btn_start_server_Click(object sender, EventArgs e)
         {
+            string input = input_box.Text;
+            char[] delimiterChars = { ' ', '\t' };
 
+            string[] words = input.Split(delimiterChars);
+            PuppetMaster.cmdStartServer(words[1], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
         }
 
         private void btn_start_client_Click(object sender, EventArgs e)
         {
 
         }
-
-       
-
+        
         private void btn_unfreeze_Click(object sender, EventArgs e)
         {
 
         }
-
-        
 
         private void btn_run_command_Click(object sender, EventArgs e)
         {

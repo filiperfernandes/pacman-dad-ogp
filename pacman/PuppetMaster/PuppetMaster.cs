@@ -104,7 +104,7 @@ namespace pacman
 
         }
 
-        private static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
+        public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
         {
             Console.WriteLine("Starting Client" + client_url);
 
@@ -123,7 +123,7 @@ namespace pacman
 
         }
 
-        private static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
+        public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
         {
             Console.WriteLine("Starting Server" + server_url);
 
@@ -138,7 +138,7 @@ namespace pacman
 
         }
 
-        static private void cmdGlobalStatus()
+        static public void cmdGlobalStatus()
         {
             Console.WriteLine("Global Status");
             //Console.WriteLine(th.ThreadState);
@@ -166,7 +166,7 @@ namespace pacman
             Console.WriteLine("Might be down: " + inactive);
         }
 
-        private static void cmdCrash(string pid)
+        public static void cmdCrash(string pid)
         {
             Console.WriteLine("Crashing");
             //TODO: Check if Server or client to properly kill
@@ -209,33 +209,33 @@ namespace pacman
             }
         }
 
-        static private void cmdFreeze(string pid)
+        static public void cmdFreeze(string pid)
         {
             Console.WriteLine("Freezing");
             //th.Suspend();
 
         }
 
-        static private void cmdUnfreeze(string pid)
+        static public void cmdUnfreeze(string pid)
         {
             Console.WriteLine("Starting CLient");
             th.Resume();
 
         }
 
-        static private void cmdInjectDelay(string src_pid, string dst_pid)
+        static public void cmdInjectDelay(string src_pid, string dst_pid)
         {
             Console.WriteLine("Injecting Delay");
 
         }
 
-        static private void cmdLocalState(string pid, int round_id)
+        static public void cmdLocalState(string pid, int round_id)
         {
             Console.WriteLine("LocalState");
 
         }
 
-        static private void cmdWait(int x_ms)
+        static public void cmdWait(int x_ms)
         {
             Console.WriteLine("Sleeping...");
 
@@ -245,7 +245,7 @@ namespace pacman
 
         }
 
-        static private IPCS checkPCS(string pcs_url)
+        static public IPCS checkPCS(string pcs_url)
         {
             if (pcsList.Any(item => item.Equals(pcs_url))){
                 return pcs[pcs_url];
