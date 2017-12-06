@@ -8,6 +8,7 @@ namespace RemotingInterfaces
         List<IClient> RegisterClient(string NewClientPort);
         void AddMoves(int gameID, List<bool> moves);
         void Crash();
+        int isAlive();
     }
 
     public interface IClient
@@ -30,7 +31,7 @@ namespace RemotingInterfaces
     {
         void Freeze();
         void Unfreeze();
-        void Crash();
+        void Crash(string url);
         string GlobalStatus();
         
     }

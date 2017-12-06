@@ -11,17 +11,16 @@ namespace pacman
 {
     public class Replica : MarshalByRefObject, IReplica
     {
+        private static Dictionary<string, int> urlToPid = new Dictionary<string, int>();
+
         public static void Main(string[] args)
         {
             string exe_path;
-            int cli = Int32.Parse(args[0]);
 
-            //string repl_url = args[0];
-            //int msec_per_round = Int32.Parse(args[1]);
-            //int num_players = Int32.Parse(args[2]);
-            //Boolean cli = Boolean.Parse(args[3]);
-
-            //Debug.WriteLine(repl_url + msec_per_round + num_players + cli);
+            string repl_url = args[0];
+            int msec_per_round = Int32.Parse(args[1]);
+            int num_players = Int32.Parse(args[2]);
+            int cli = Int32.Parse(args[3]);
 
 
             if (cli==1)
@@ -33,54 +32,32 @@ namespace pacman
                 exe_path = Server.exe_path();
             }
 
-            string args2 = "";
-            //exe_path = Server.exe_path();
+            string args2 = repl_url + ' ' + msec_per_round + ' ' + num_players;
             ProcessStartInfo info = new ProcessStartInfo(exe_path, args2);
             info.CreateNoWindow = false;
 
             Process p = Process.Start(info);
 
+            urlToPid.Add(repl_url,p.Id);
         }
 
-
-        //public Replica(string repl_url, Boolean cli)
-        //{
-        //    string exe_path;
-
-        //    if (cli)
-        //    {
-        //        exe_path = Client.exe_path();
-        //    }
-        //    else
-        //    {
-        //        exe_path = Server.exe_path();
-        //    }
-
-        //    string args = "";
-        //    ProcessStartInfo info = new ProcessStartInfo(exe_path, args);
-        //    info.CreateNoWindow = false;
-
-        //    Process p = Process.Start(info);
-
-        //    //return p.Id;
-
-        //}
 
         public static string exe_path()
         {
             return @Environment.CurrentDirectory + "/Replica.exe";
         }
 
-        public void Crash()
+        public void Crash(string url)
         {
-            //IServer root = RemotingServices.Connect(typeof(IServer),
-            //   url) as IServer;
-            //root.Crash();
             Console.WriteLine("CRASH");
-            Process.GetCurrentProcess().Kill();
+            try
+            {
+                Process.GetProcessById(urlToPid[url]).Kill();
+            }
+            catch (Exception ex) { };
         }
 
-        public void Freeze()
+        public void Freeze(string url)
         {
             throw new NotImplementedException();
         }
@@ -91,6 +68,11 @@ namespace pacman
         }
 
         public void Unfreeze()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Freeze()
         {
             throw new NotImplementedException();
         }

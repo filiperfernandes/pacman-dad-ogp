@@ -108,11 +108,6 @@ namespace pacman
 
             pidToUrl.Add(pid, client_url);
 
-            //dpcs.Add(pid, PCS.createReplica(pid, pcs_url, client_url, msec_per_round, num_players, true));
-            //IServer srv = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:8086/Server");
-            //server = srv;
-            //server.Crash();
-
             Console.WriteLine("Checking for pcs");
             checkPCS(pcs_url);
             Console.WriteLine(pcs_url);
@@ -130,16 +125,11 @@ namespace pacman
             Console.WriteLine("Starting Server" + server_url);
 
             pidToUrl.Add(pid, server_url);
-            //dpcs.Add(pid, PCS.createReplica(pid, pcs_url, server_url, msec_per_round, num_players, false));
-            //PCS pcs = new PCS(pcs_url);
-            //PCS pcs = new PCS();
 
             Console.WriteLine("Checking for pcs");
             remote = checkPCS(pcs_url);
             Console.WriteLine(pcs_url);
-
-
-            
+           
             remote.createReplica(pid, pcs_url, server_url, msec_per_round, num_players, 0);
 
         }
@@ -153,17 +143,50 @@ namespace pacman
         private static void cmdCrash(string pid)
         {
             Console.WriteLine("Crashing");
-            
-            //pcs.crashReplica();
-            //PCS.crashReplica(pidToUrl[pid]);
+            //TODO: Check if Server or client to properly kill
 
+            string stringCutted = pidToUrl[pid].Split('/').Last();
+            Console.WriteLine(stringCutted);
 
+            char[] delimiterChars = { ':', '/' };
+            string[] words = pidToUrl[pid].Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+            if (stringCutted.Equals("Server")) {
+                //IServer remote = RemotingServices.Connect(typeof(IServer),
+                //pidToUrl[pid]) as IServer;
+
+                IServer remote = RemotingServices.Connect(typeof(IServer),
+                "tcp://localhost:"+port+"/Server") as IServer;
+                try
+                {
+                    remote.Crash();
+                    pidToUrl.Remove(pid);
+                }
+                catch (Exception ex) { };
+            }
+            else
+            {
+                IClient remote = RemotingServices.Connect(typeof(IClient),
+                "tcp://localhost:" + port + "/Client") as IClient;
+                try
+                {
+                    Console.WriteLine(pidToUrl[pid]);
+                    remote.Crash();
+                    pidToUrl.Remove(pid);
+                }
+                catch (Exception ex) { };
+            //IClient client = (IClient)Activator.GetObject(typeof(IClient), pidToUrl[pid]);
+            //client.Crash();
+            }
         }
 
         static private void cmdFreeze(string pid)
         {
             Console.WriteLine("Freezing");
-            th.Suspend();
+            //th.Suspend();
 
         }
 

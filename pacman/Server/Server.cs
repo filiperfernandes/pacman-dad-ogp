@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 using RemotingInterfaces;
 using System.Diagnostics;
+using System.Runtime.Serialization.Formatters;
+using System.Collections;
+using System.Net;
 
 namespace pacman
 {
@@ -18,13 +21,27 @@ namespace pacman
         private static Dictionary<int, List<bool>> roundMoves;
         private static Dictionary<int, IClient> clients;
         private static ServerPacman game;
+        private static int num_players;
 
-        public Server(int port)
+        public Server(string url, int port)
         {
             roundMoves = new Dictionary<int, List<bool>>();
             clients = new Dictionary<int, IClient>();
             ServerServices.server = this;
             TcpChannel channel = new TcpChannel(port);
+
+            //BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+            //provider.TypeFilterLevel = TypeFilterLevel.Full;
+            //IDictionary props = new Hashtable();
+            //props["name"] = "tcp";
+            //props["bindTo"] = "127.0.0.1";
+            //props["bindTo"] = IPAddress.Parse("1.2.3.4");
+            //props["port"] = port;
+            //TcpChannel channel = new TcpChannel(props, null, provider);
+
+
+
+            Console.WriteLine(channel.ChannelName);
             ChannelServices.RegisterChannel(channel, false);
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(ServerServices), "Server",
@@ -39,19 +56,31 @@ namespace pacman
         [STAThread]
         static void Main(string[] args)
         {
+            string url = args[0];
+            int msec_per_round = Int32.Parse(args[1]);
+            //int num_players = Int32.Parse(args[2]);
+
+            char[] delimiterChars = { ':', '/' };
+            string[] words = url.Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+            num_players = Int32.Parse(args[2]);
+
             game = new ServerPacman(1);
             enoughPlayersTimer = new Timer(20);
             enoughPlayersTimer.Elapsed += checkIfEnoughPlayers;
             enoughPlayersTimer.AutoReset = true;
             enoughPlayersTimer.Enabled = true;
-            new Server(8086);
+            new Server(url, port);
+            Console.WriteLine("Listening on port " + port);
             Console.WriteLine("Press <enter> to terminate chat server...");
             Console.ReadLine();
         }
 
         private static void checkIfEnoughPlayers(object sender, ElapsedEventArgs e)
         {
-            if (clients.Count > 1)
+            if (clients.Count >= num_players)
             {
                 enoughPlayersTimer.Enabled = false;
                 List<PacmanObject> positions = game.setLevel1();
@@ -224,6 +253,11 @@ namespace pacman
         {
             Console.WriteLine("Aqui");
             Process.GetCurrentProcess().Kill();
+        }
+
+        int IServer.isAlive()
+        {
+            return 1;
         }
     }
 

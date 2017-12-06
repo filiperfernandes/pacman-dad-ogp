@@ -53,11 +53,6 @@ namespace pacman
             PCS pcs = new PCS();
             RemotingServices.Marshal(pcs, "pcs", typeof(IPCS));
 
-            //createReplica("", "", "", 10, 10, false);
-            //createReplica("", "", "", 10, 10, true);
-            //createReplica("", "", "", 10, 10, true);
-
-
             // Dont close console
             Console.ReadLine();
 
@@ -74,17 +69,8 @@ namespace pacman
 
             string exe_path;
 
-            //if (cli)
-            //{
-            //    exe_path = Client.exe_path();
-            //}
-            //else
-            //{
-            //    exe_path = Server.exe_path();
-            //}
-
             exe_path = Replica.exe_path();
-            ProcessStartInfo info = new ProcessStartInfo(exe_path, cli.ToString());
+            ProcessStartInfo info = new ProcessStartInfo(exe_path, args);
             info.CreateNoWindow = false;
 
             Process.Start(info);

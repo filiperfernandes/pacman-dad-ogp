@@ -20,9 +20,10 @@ namespace pacman {
         private int gameID = 0;
         List<bool> moves = new List<bool>(new bool[4]);
 
-        public Form1() {
-            
-            this.port = FreeTcpPort();
+        public Form1(int port) {
+
+            //this.port = FreeTcpPort();
+            this.port = port;
             ClientServices.form = this;
             TcpChannel chan = new TcpChannel(port);
             ChannelServices.RegisterChannel(chan, false);
@@ -32,7 +33,8 @@ namespace pacman {
             RemotingServices.Marshal(servicos, "Client",
                 typeof(ClientServices));
 
-            this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:8086/Server");
+            this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:20001/Server");
+            //this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://1.2.3.4:20001/Server");
             this.client = (IClient)Activator.GetObject(typeof(IClient), "tcp://localhost:" + this.port + "/Client");
             ClientServices.players = server.RegisterClient(port.ToString());
             InitializeComponent();
@@ -226,6 +228,10 @@ namespace pacman {
         {
 
         }
+        private void Form1_Closed(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 
     delegate void DelAddMsg(string mensagem);
@@ -311,7 +317,8 @@ namespace pacman {
 
         public void Crash()
         {
-            Console.WriteLine("Aqui");
+            Console.WriteLine("CRASH");
+            Form1.ActiveForm.Close();
             Process.GetCurrentProcess().Kill();
         }
     }
