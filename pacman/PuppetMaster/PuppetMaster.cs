@@ -25,14 +25,16 @@ namespace pacman
         private static List<string> activeServer = new List<string>();
         private static List<string> activeClient = new List<string>();
         static IPCS remote;
+        static MainWindow main;
 
 
         [STAThread]
         static void Main()
         {
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new MainWindow());
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            main = new MainWindow();
+            Application.Run(main);
 
             Console.WriteLine("Cheguei");
             while (true) { readConsole(); };
@@ -126,6 +128,7 @@ namespace pacman
         public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
         {
             Console.WriteLine("Starting Server" + server_url);
+            main.output_box.Text = "Starting Server";
 
             pidToUrl.Add(pid, server_url);
             activeServer.Add(server_url);
