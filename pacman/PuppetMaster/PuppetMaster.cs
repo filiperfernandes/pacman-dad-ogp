@@ -56,13 +56,17 @@ namespace pacman
         {
             Console.WriteLine("Alive");
         }
+        static public string[] splitInputBox (string input)
+        {
+            
+            char[] delimiterChars = { ' ', '\t' };
+            string[] words = input.Split(delimiterChars);
+            return words;
+        }
 
         private static void readConsole()
         {
-            string input = Console.ReadLine();
-            char[] delimiterChars = { ' ','\t' };
-
-            string[] words = input.Split(delimiterChars);
+            string[] words = splitInputBox(Console.ReadLine());
 
             switch (words[0])
             {

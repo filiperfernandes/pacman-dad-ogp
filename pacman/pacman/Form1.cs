@@ -232,6 +232,11 @@ namespace pacman {
         {
             this.Close();
         }
+
+        private void tbChat_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
     delegate void DelAddMsg(string mensagem);

@@ -17,6 +17,8 @@ namespace pacman
         {
             InitializeComponent();
         }
+
+        
         
         private void MainWindow_Load_1(object sender, EventArgs e)
         {
@@ -25,7 +27,7 @@ namespace pacman
 
         private void btn_crash_Click(object sender, EventArgs e)
         {
-
+            PuppetMaster.cmdCrash(input_box.Text);
         }
 
         private void btn_freeze_Click(object sender, EventArgs e)
@@ -35,7 +37,7 @@ namespace pacman
         
         private void btn_wait_Click(object sender, EventArgs e)
         {
-
+            PuppetMaster.cmdWait(Int32.Parse(input_box.Text));
         }
 
        
@@ -48,16 +50,19 @@ namespace pacman
        
         private void btn_start_server_Click(object sender, EventArgs e)
         {
-            string input = input_box.Text;
-            char[] delimiterChars = { ' ', '\t' };
+            String[] words = PuppetMaster.splitInputBox(input_box.Text);
 
-            string[] words = input.Split(delimiterChars);
+
             PuppetMaster.cmdStartServer(words[1], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
         }
 
         private void btn_start_client_Click(object sender, EventArgs e)
         {
+            string input = input_box.Text;
+            char[] delimiterChars = { ' ', '\t' };
 
+            string[] words = input.Split(delimiterChars);
+            PuppetMaster.cmdStartServer(words[1], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
         }
         
         private void btn_unfreeze_Click(object sender, EventArgs e)
