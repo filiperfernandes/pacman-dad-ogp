@@ -21,8 +21,11 @@ namespace pacman
         // Dictionary key: player gameID, value: moves of the player
         private static Dictionary<int, List<bool>> roundMoves;
         private static Dictionary<int, IClient> clients;
+        //public static List<int> freezeClients = new List<int>();
         private static ServerPacman game;
         private static int num_players;
+        private static int msec_per_round;
+        public static Boolean processing = true;
 
         public Server(string url, int port)
         {
@@ -58,7 +61,7 @@ namespace pacman
         static void Main(string[] args)
         {
             string url = args[0];
-            int msec_per_round = Int32.Parse(args[1]);
+            msec_per_round = Int32.Parse(args[1]);
             //int num_players = Int32.Parse(args[2]);
 
             char[] delimiterChars = { ':', '/' };
@@ -108,7 +111,7 @@ namespace pacman
                     ((IClient)clients[key]).setInitialGame(myList);
                 }
                 //System.Threading.Thread.Sleep(1000);
-                myTimer = new Timer(20);
+                myTimer = new Timer(msec_per_round);
                 myTimer.Elapsed += AtualizaJogo;
                 myTimer.AutoReset = true;
                 myTimer.Enabled = true;
@@ -117,25 +120,34 @@ namespace pacman
 
         private static void AtualizaJogo(object sender, ElapsedEventArgs e)
         {
-            if (clients.Count > 0)
+            if(processing)
             {
-                //List of tuples with tag, name, score, xPosition and yPosition
-                Dictionary<string, Tuple<string, int, int, int>> whatToSend =
-                    new Dictionary<string, Tuple<string, int, int, int>>();
-                List<PacmanObject> positions = game.updateGame(roundMoves);
-                foreach (PacmanObject pacmanObject in positions)
+                if (clients.Count > 0)
                 {
-                    whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
-                        pacmanObject.getTag(),
-                        pacmanObject.getScore(),
-                        pacmanObject.getCurrentX(),
-                        pacmanObject.getCurrentY()));
+                    //List of tuples with tag, name, score, xPosition and yPosition
+                    Dictionary<string, Tuple<string, int, int, int>> whatToSend =
+                        new Dictionary<string, Tuple<string, int, int, int>>();
+                    List<PacmanObject> positions = game.updateGame(roundMoves);
+                    foreach (PacmanObject pacmanObject in positions)
+                    {
+                        whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
+                            pacmanObject.getTag(),
+                            pacmanObject.getScore(),
+                            pacmanObject.getCurrentX(),
+                            pacmanObject.getCurrentY()));
+                    }
+                    foreach (var key in clients.Keys)
+                    {
+                        //if (freezeClients.Contains(key)){
+                        //    continue;
+                        //}
+                        //else {
+                            ((IClient)clients[key]).PlayMoves(whatToSend);
+                        //}
+                        
+                    }
+                    roundMoves = new Dictionary<int, List<bool>>();
                 }
-                foreach (var key in clients.Keys)
-                {
-                    ((IClient)clients[key]).PlayMoves(whatToSend);
-                }
-                roundMoves = new Dictionary<int, List<bool>>();
             }
         }
 
@@ -250,6 +262,16 @@ namespace pacman
         int IServer.isAlive()
         {
             return 1;
+        }
+
+        public void Freeze()
+        {
+            Server.processing = false;
+        }
+
+        public void Unfreeze()
+        {
+            Server.processing = true;
         }
     }
 

@@ -9,6 +9,8 @@ namespace RemotingInterfaces
         void AddMoves(int gameID, List<bool> moves);
         void Crash();
         int isAlive();
+        void Freeze();
+        void Unfreeze();
     }
 
     public interface IClient
@@ -21,6 +23,8 @@ namespace RemotingInterfaces
         void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList);
         void Crash();
         int isAlive();
+        void Freeze();
+        void Unfreeze();
     }
    
 
