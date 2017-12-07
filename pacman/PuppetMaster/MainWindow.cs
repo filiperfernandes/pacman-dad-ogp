@@ -16,6 +16,7 @@ namespace pacman
         public MainWindow()
         {
             InitializeComponent();
+            output_box.Text = "";
         }
 
         

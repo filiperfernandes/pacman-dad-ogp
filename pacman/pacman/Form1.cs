@@ -338,7 +338,6 @@ namespace pacman {
         public void Crash()
         {
             Console.WriteLine("CRASH");
-            Form1.ActiveForm.Close();
             Process.GetCurrentProcess().Kill();
         }
 

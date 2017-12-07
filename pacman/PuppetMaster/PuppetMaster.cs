@@ -37,6 +37,8 @@ namespace pacman
             Application.SetCompatibleTextRenderingDefault(false);
             main = new MainWindow();
             Application.Run(main);
+            //printPM("Cheguei");
+            Console.WriteLine("Cheguei");
 
             //Console.WriteLine("Cheguei");
             //while (true) { readConsole(); };
@@ -46,22 +48,9 @@ namespace pacman
 
         private static void consoleApp()
         {
-            Console.WriteLine("Cheguei");
             while (true) { readConsole(); };
         }
 
-        //static void Main()
-        //{
-        //    System.Console.WriteLine("Cheguei");
-        //    while (true) { readConsole(); };
-        //    //readConsole();
-        //    //System.Console.ReadLine();
-        //}
-
-        private static void testStuff()
-        {
-            Console.WriteLine("Alive");
-        }
         static public string[] splitInputBox (string input)
         {
             
@@ -112,15 +101,18 @@ namespace pacman
 
         public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
         {
-            Console.WriteLine("Starting Client" + client_url);
-            main.output_box.Text += "Starting Client \r\n";
+            //printPM("Starting Client");
+            Console.WriteLine("Starting Client");
 
             pidToUrl.Add(pid, client_url);
             activeClient.Add(client_url);
 
-            Console.WriteLine("Checking for pcs");
+            //printPM("Checking for PCS");
+            Console.WriteLine("Checking for PCS");
             remote = checkPCS(pcs_url);
+            //printPM(pcs_url);
             Console.WriteLine(pcs_url);
+
 
             remote.createReplica(pid, pcs_url, client_url, msec_per_round, num_players, 1);
 
@@ -128,23 +120,26 @@ namespace pacman
 
         public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
         {
-            printPM("Starting Server");
+            //printPM("Starting Server");
+            Console.WriteLine("Starting Client");
 
             pidToUrl.Add(pid, server_url);
             activeServer.Add(server_url);
 
-            Console.WriteLine("Checking for pcs");
+            //printPM("Checking for PCS");
+            Console.WriteLine("Checking for PCS");
             remote = checkPCS(pcs_url);
+            //printPM(pcs_url);
             Console.WriteLine(pcs_url);
-           
+
             remote.createReplica(pid, pcs_url, server_url, msec_per_round, num_players, 0);
 
         }
 
         static public void cmdGlobalStatus()
         {
+            //printPM("Global Status");
             Console.WriteLine("Global Status");
-            //Console.WriteLine(th.ThreadState);
 
             Replica r = new Replica();
 
@@ -172,8 +167,6 @@ namespace pacman
         public static void cmdCrash(string pid)
         {
             Console.WriteLine("Crashing");
-            main.output_box.Text += "Crashing \r\n";
-            //TODO: Check if Server or client to properly kill
 
             string stringCutted = pidToUrl[pid].Split('/').Last();
             Console.WriteLine(stringCutted);
@@ -204,7 +197,6 @@ namespace pacman
                 "tcp://localhost:" + port + "/Client") as IClient;
                 try
                 {
-                    Console.WriteLine(pidToUrl[pid]);
                     pidToUrl.Remove(pid);
                     remote.Crash();          
                 }
@@ -217,17 +209,12 @@ namespace pacman
         static public void cmdFreeze(string pid)
         {
             Console.WriteLine("Freezing");
-            main.output_box.Text += "Freezing \r\n";
-
-            //th.Suspend();
 
         }
 
         static public void cmdUnfreeze(string pid)
         {
             Console.WriteLine("Unfreezing CLient");
-            main.output_box.Text += "Unfreezing \r\n";
-
         }
 
         static public void cmdInjectDelay(string src_pid, string dst_pid)
@@ -244,9 +231,7 @@ namespace pacman
 
         static public void cmdWait(int x_ms)
         {
-            Console.WriteLine("Sleeping...");
-
-            Console.WriteLine(x_ms);
+            Console.WriteLine("Sleeping for " + x_ms.ToString());
 
             System.Threading.Thread.Sleep(x_ms);
 
@@ -276,7 +261,7 @@ namespace pacman
 
         }
 
-        static private void printPM(string text)
+        static public void printPM(string text)
         {
             Console.WriteLine(text);
             main.output_box.Text += text +  "\r\n";
