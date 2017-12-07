@@ -1,37 +1,70 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Threading;
 using System.Threading.Tasks;
+using RemotingInterfaces;
+using System.Runtime.Remoting;
+using System.Diagnostics;
 
 namespace pacman
 {
     class PuppetMaster
     {
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        /// 
+        
+        private static Dictionary<string, int> dpcs = new Dictionary<string, int>();
+        private static Dictionary<string, string> pidToUrl = new Dictionary<string, string>();
+        private static List<string> pcsList = new List<string>();
+        private static Dictionary<string, IPCS> pcs = new Dictionary<string, IPCS>();
+        private static List<string> activeServer = new List<string>();
+        private static List<string> activeClient = new List<string>();
+        static IPCS remote;
+        static MainWindow main;
 
-        public static string ext_pid;
-        static Thread th;
-        static ThreadStart ths;
+
+        [STAThread]
         static void Main()
         {
+            var th = new Thread(consoleApp);
+            th.Start();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            main = new MainWindow();
+            Application.Run(main);
+            //printPM("Cheguei");
+            Console.WriteLine("Cheguei");
 
-            while (true) { readConsole(); };
+            //Console.WriteLine("Cheguei");
+            //while (true) { readConsole(); };
             //readConsole();
-            //System.Console.ReadLine();
+            //Console.ReadLine();
         }
 
-        private static void testStuff()
-        {    
-            Console.WriteLine("Alive");
-        }
-
-        static private void readConsole()
+        private static void consoleApp()
         {
-            string input = Console.ReadLine();
-            char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
+            string input;
+            while (true) {
+                input = Console.ReadLine();
+                readConsole(input); };
+        }
 
+        static public string[] splitInputBox (string input)
+        {
+            
+            char[] delimiterChars = { ' ', '\t' };
             string[] words = input.Split(delimiterChars);
+            return words;
+        }
+
+        public static void readConsole(string input)
+        {
+            string[] words = splitInputBox(input);
 
             switch (words[0])
             {
@@ -69,98 +102,172 @@ namespace pacman
 
         }
 
-        static private void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
+        public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
         {
+            //printPM("Starting Client");
             Console.WriteLine("Starting Client");
-            ext_pid = pid;
 
-            Console.WriteLine("EXT is: " + ext_pid);
+            pidToUrl.Add(pid, client_url);
+            activeClient.Add(client_url);
 
-            Stuff test = new Stuff();
-            test.pid = "pid";
-            ths = new ThreadStart(test.main);
-            th = new Thread(ths);
-            th.Start();
-            Thread.Sleep(1000);
-            Console.WriteLine("Main thread ({0}) exiting...",
-                              Thread.CurrentThread.ManagedThreadId);
+            //printPM("Checking for PCS");
+            Console.WriteLine("Checking for PCS");
+            remote = checkPCS(pcs_url);
+            //printPM(pcs_url);
+            Console.WriteLine(pcs_url);
 
 
-        }
-
-        static private void cmdStartServer(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
-        {
-            Console.WriteLine("Starting Server");
+            remote.createReplica(pid, pcs_url, client_url, msec_per_round, num_players, 1);
 
         }
 
-        static private void cmdGlobalStatus()
+        public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
         {
+            //printPM("Starting Server");
+            Console.WriteLine("Starting Client");
+
+            pidToUrl.Add(pid, server_url);
+            activeServer.Add(server_url);
+
+            //printPM("Checking for PCS");
+            Console.WriteLine("Checking for PCS");
+            remote = checkPCS(pcs_url);
+            //printPM(pcs_url);
+            Console.WriteLine(pcs_url);
+
+            remote.createReplica(pid, pcs_url, server_url, msec_per_round, num_players, 0);
+
+        }
+
+        static public void cmdGlobalStatus()
+        {
+            //printPM("Global Status");
             Console.WriteLine("Global Status");
-            Console.WriteLine(th.ThreadState);
+
+            Replica r = new Replica();
+
+            int s = 1;
+            int c = 1;
+            string active = "";
+            string inactive = "";
+            foreach (var s_url in activeServer)
+            {
+                if (r.CheckServer(s_url)==1) { active += " S" + s; }
+                else { inactive += " S" + s; }
+                s += 1;
+            }
+            foreach (var c_url in activeClient)
+            {
+                if (r.CheckClient(c_url) == 1) { active += " C" + c; }
+                else { inactive += " C" + c; }
+                c += 1;
+            }
+
+            Console.WriteLine("Everything okay with: " + active);
+            Console.WriteLine("Might be down: " + inactive);
         }
 
-        static private void cmdCrash(string pid)
+        public static void cmdCrash(string pid)
         {
             Console.WriteLine("Crashing");
 
-            try
-            {
-                //th.ResetAbort();
-                th.Abort();
-            }
-            catch (ThreadAbortException)
-            {
-                Console.WriteLine("Abort!");
-            }
-            
+            string stringCutted = pidToUrl[pid].Split('/').Last();
+            Console.WriteLine(stringCutted);
 
+            char[] delimiterChars = { ':', '/' };
+            string[] words = pidToUrl[pid].Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+            if (stringCutted.Equals("Server")) {
+                //IServer remote = RemotingServices.Connect(typeof(IServer),
+                //pidToUrl[pid]) as IServer;
+
+                IServer remote = RemotingServices.Connect(typeof(IServer),
+                "tcp://localhost:"+port+"/Server") as IServer;
+                try
+                {
+
+                    pidToUrl.Remove(pid);
+                    remote.Crash();
+                }
+                catch (Exception ex) { };
+            }
+            else
+            {
+                IClient remote = RemotingServices.Connect(typeof(IClient),
+                "tcp://localhost:" + port + "/Client") as IClient;
+                try
+                {
+                    pidToUrl.Remove(pid);
+                    remote.Crash();          
+                }
+                catch (Exception ex) { };
+            //IClient client = (IClient)Activator.GetObject(typeof(IClient), pidToUrl[pid]);
+            //client.Crash();
+            }
         }
 
-        static private void cmdFreeze(string pid)
+        static public void cmdFreeze(string pid)
         {
             Console.WriteLine("Freezing");
-            th.Suspend();
-       
+
         }
 
-        static private void cmdUnfreeze(string pid)
+        static public void cmdUnfreeze(string pid)
         {
-            Console.WriteLine("Starting CLient");
-            th.Resume();
-
+            Console.WriteLine("Unfreezing CLient");
         }
 
-        static private void cmdInjectDelay(string src_pid, string dst_pid)
+        static public void cmdInjectDelay(string src_pid, string dst_pid)
         {
             Console.WriteLine("Injecting Delay");
 
         }
 
-        static private void cmdLocalState(string pid, int round_id)
+        static public void cmdLocalState(string pid, int round_id)
         {
             Console.WriteLine("LocalState");
 
         }
 
-        static private void cmdWait(int x_ms)
+        static public void cmdWait(int x_ms)
         {
-            Console.WriteLine("Sleeping...");
-
-            Console.WriteLine(x_ms);
+            Console.WriteLine("Sleeping for " + x_ms.ToString());
 
             System.Threading.Thread.Sleep(x_ms);
 
         }
-    }
 
-    class Stuff
-    {
-        public string pid { get; set; }
-
-        public void main()
+        static public IPCS checkPCS(string pcs_url)
         {
-            Console.WriteLine(pid);
+            if (pcsList.Any(item => item.Equals(pcs_url))){
+                return pcs[pcs_url];
+            }
+            else
+            {
+                ProcessStartInfo info = new ProcessStartInfo(PCS.exe_path(), pcs_url);
+                info.CreateNoWindow = false;
+
+                remote = RemotingServices.Connect(typeof(IPCS),
+                "tcp://localhost:11000/PCS") as IPCS;
+
+                pcsList.Add(pcs_url);
+                pcs.Add(pcs_url, remote);
+
+
+                Process.Start(info);
+
+                return pcs[pcs_url];
+            }
+
+        }
+
+        static public void printPM(string text)
+        {
+            Console.WriteLine(text);
+            main.output_box.Text += text +  "\r\n";
         }
     }
 }

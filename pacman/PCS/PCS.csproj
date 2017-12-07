@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A907C8B1-EFEB-4C2E-90B0-37ADBCADB14A}</ProjectGuid>
+    <ProjectGuid>{4E483B22-39F2-4F55-93D7-5B643441BB30}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>PCS</RootNamespace>
     <AssemblyName>PCS</AssemblyName>
@@ -54,9 +54,9 @@
       <Project>{ece5a838-e181-493a-b9a2-6add01de37f6}</Project>
       <Name>pacman</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PuppetMaster\PuppetMaster.csproj">
-      <Project>{0c373632-ad85-4802-b8c6-f32560de2247}</Project>
-      <Name>PuppetMaster</Name>
+    <ProjectReference Include="..\Replica\Replica.csproj">
+      <Project>{74beebb3-1d84-44e0-8af7-cb10e4649238}</Project>
+      <Name>Replica</Name>
     </ProjectReference>
     <ProjectReference Include="..\Server\Server.csproj">
       <Project>{f22ff374-d035-4a14-9a71-b0bc935bc225}</Project>

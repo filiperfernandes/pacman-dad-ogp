@@ -6,94 +6,154 @@ using System.Timers;
 using System.Collections.Generic;
 
 using RemotingInterfaces;
+using System.Diagnostics;
+using System.Runtime.Serialization.Formatters;
+using System.Collections;
+using System.Net;
 
-namespace Server
+namespace pacman
 {
-    class Server
+    public class Server
     {
+        private Object thisLock = new Object();
+        private static Timer enoughPlayersTimer;
         private static Timer myTimer;
-        // Dictionary key: round, value: players round moves
-        private static Dictionary<int, Dictionary<int, List<bool>>> allRoundsMoves;
         // Dictionary key: player gameID, value: moves of the player
         private static Dictionary<int, List<bool>> roundMoves;
         private static Dictionary<int, IClient> clients;
         private static ServerPacman game;
+        private static int num_players;
 
-        public Server(int port)
+        public Server(string url, int port)
         {
-            allRoundsMoves = new Dictionary<int, Dictionary<int, List<bool>>>();
             roundMoves = new Dictionary<int, List<bool>>();
             clients = new Dictionary<int, IClient>();
             ServerServices.server = this;
             TcpChannel channel = new TcpChannel(port);
+
+            //BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+            //provider.TypeFilterLevel = TypeFilterLevel.Full;
+            //IDictionary props = new Hashtable();
+            //props["name"] = "tcp";
+            //props["bindTo"] = "127.0.0.1";
+            //props["bindTo"] = IPAddress.Parse("1.2.3.4");
+            //props["port"] = port;
+            //TcpChannel channel = new TcpChannel(props, null, provider);
+
+
+
+            Console.WriteLine(channel.ChannelName);
             ChannelServices.RegisterChannel(channel, false);
             RemotingConfiguration.RegisterWellKnownServiceType(
                 typeof(ServerServices), "Server",
                 WellKnownObjectMode.Singleton);
         }
 
+        public static string exe_path()
+        {
+            return @Environment.CurrentDirectory + "/Server.exe";
+        }
+
         [STAThread]
         static void Main(string[] args)
         {
-            game = new ServerPacman(1);
-            game.setLevel1();
-            myTimer = new Timer(20);
-            myTimer.Elapsed += AtualizaJogo;
-            myTimer.AutoReset = true;
-            myTimer.Enabled = true;
-            new Server(8086);
+            string url = args[0];
+            int msec_per_round = Int32.Parse(args[1]);
+            //int num_players = Int32.Parse(args[2]);
+
+            char[] delimiterChars = { ':', '/' };
+            string[] words = url.Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+            num_players = Int32.Parse(args[2]);
+
+            game = new ServerPacman(num_players);
+            enoughPlayersTimer = new Timer(msec_per_round);
+            enoughPlayersTimer.Elapsed += checkIfEnoughPlayers;
+            enoughPlayersTimer.AutoReset = true;
+            enoughPlayersTimer.Enabled = true;
+            new Server(url, port);
+            Console.WriteLine("Listening on port " + port);
             Console.WriteLine("Press <enter> to terminate chat server...");
             Console.ReadLine();
+        }
+
+        private static void checkIfEnoughPlayers(object sender, ElapsedEventArgs e)
+        {
+            if (clients.Count >= num_players)
+            {
+                enoughPlayersTimer.Enabled = false;
+                List<PacmanObject> positions = game.setLevel1();
+                //List of tuples with tag, name, score, xPosition, yPosition, xSize and ySize
+                List<Tuple<string, string, int, int, int, int, int>> myList =
+                    new List<Tuple<string, string, int, int, int, int, int>>();
+                foreach (PacmanObject pacmanObject in positions)
+                {
+                    myList.Add(new Tuple<string, string, int, int, int, int, int>(
+                        pacmanObject.getTag(), pacmanObject.getName(), 0,
+                        pacmanObject.getCurrentX(), pacmanObject.getCurrentY(),
+                        pacmanObject.getObjectRectangle().Width, pacmanObject.getObjectRectangle().Height));
+                }
+                /*if (flag == 0)
+                {
+                    foreach (Tuple<string, string, int, int, int, int, int> x in myList)
+                    {
+                        Console.WriteLine("List: {0} {1} {2} {3} {4} {5} {6}", x.Item1, x.Item2, x.Item3, x.Item4, x.Item5, x.Item6, x.Item7);
+                    }
+                }
+                flag = 1;*/
+                foreach (var key in clients.Keys)
+                {
+                    ((IClient)clients[key]).setInitialGame(myList);
+                }
+                //System.Threading.Thread.Sleep(1000);
+                myTimer = new Timer(20);
+                myTimer.Elapsed += AtualizaJogo;
+                myTimer.AutoReset = true;
+                myTimer.Enabled = true;
+            }
         }
 
         private static void AtualizaJogo(object sender, ElapsedEventArgs e)
         {
             if (clients.Count > 0)
             {
-                allRoundsMoves.Add(allRoundsMoves.Count + 1, roundMoves);
                 //List of tuples with tag, name, score, xPosition and yPosition
-                List<Tuple<string, string, int, int, int>> mylist = new List<Tuple<string, string, int, int, int>>();
+                Dictionary<string, Tuple<string, int, int, int>> whatToSend =
+                    new Dictionary<string, Tuple<string, int, int, int>>();
                 List<PacmanObject> positions = game.updateGame(roundMoves);
                 foreach (PacmanObject pacmanObject in positions)
                 {
-                    mylist.Add(new Tuple<string, string, int, int, int>(pacmanObject.getTag(),
-                        pacmanObject.getName(),
+                    whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
+                        pacmanObject.getTag(),
                         pacmanObject.getScore(),
-                        pacmanObject.getObjectRectangle().X, 
-                        pacmanObject.getObjectRectangle().Y));
+                        pacmanObject.getCurrentX(),
+                        pacmanObject.getCurrentY()));
                 }
                 foreach (var key in clients.Keys)
                 {
-                    ((IClient)clients[key]).PlayMoves(mylist);
+                    ((IClient)clients[key]).PlayMoves(whatToSend);
                 }
                 roundMoves = new Dictionary<int, List<bool>>();
             }
-            /*if(allRoundsMoves.Count == 10)
-            {
-                foreach (KeyValuePair<int, Dictionary<int, List<bool>>> round in allRoundsMoves)
-                {
-                    Console.WriteLine("Round = {0}", round.Key);
-                    foreach (KeyValuePair<int, List<bool>> player in round.Value)
-                    {
-                        Console.WriteLine("GameID = {0}, moves = [{1}, {2}, {3}, {4}]", player.Key,
-                            player.Value[0].ToString(), player.Value[1].ToString(),
-                            player.Value[2].ToString(), player.Value[3].ToString());
-                    }
-                }
-            }*/
         }
 
         public void AddMoves(int gameID, List<bool> moves)
         {
-            for (int i = 0; i < roundMoves.Count; i++)
+            lock (thisLock)
             {
                 if (roundMoves.ContainsKey(gameID))
                 {
                     roundMoves[gameID] = moves;
                     return;
                 }
+                else
+                {
+                    roundMoves.Add(gameID, moves);
+                }
             }
-            roundMoves.Add(gameID, moves);
+            
         }
 
         public void RegisterClient(int gameID, string NewClientName)
@@ -180,8 +240,20 @@ namespace Server
             DelAddMoves delAddMoves = new DelAddMoves(server.AddMoves);
             delAddMoves(gameID, moves);
         }
+
+        public void Crash()
+        {
+            Console.WriteLine("Aqui");
+            Process.GetCurrentProcess().Kill();
+        }
+
+        int IServer.isAlive()
+        {
+            return 1;
+        }
     }
 
+    [Serializable]
     class PacmanObject
     {
         private string tag;
@@ -189,6 +261,9 @@ namespace Server
         private int score = 0;
         private int xSpeed = 0;
         private int ySpeed = 0;
+        private int currentX = 0;
+        private int currentY = 0;
+        private bool isAlive = true;
         private System.Drawing.Point initialPosition;
         private System.Drawing.Rectangle objectRectangle;
 
@@ -204,7 +279,9 @@ namespace Server
             this.name = name;
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
-            this.initialPosition = new System.Drawing.Point((position % 9) * 40 + 8, ((position / 9) + 1) * 40);
+            this.currentX = (position % 9) * 40 + 8;
+            this.currentY = ((position / 9) + 1) * 40;
+            this.initialPosition = new System.Drawing.Point(this.currentX, this.currentY);
             System.Drawing.Size size = new System.Drawing.Size(xSize, ySize);
             this.objectRectangle = new System.Drawing.Rectangle(initialPosition, size);
         }
@@ -216,6 +293,8 @@ namespace Server
             this.name = name;
             this.xSpeed = xSpeed;
             this.ySpeed = ySpeed;
+            this.currentX = xPosition;
+            this.currentY = yPosition;
             System.Drawing.Point pointPosition = new System.Drawing.Point(xPosition, yPosition);
             System.Drawing.Size size = new System.Drawing.Size(xSize, ySize);
             this.objectRectangle = new System.Drawing.Rectangle(pointPosition, size);
@@ -271,9 +350,46 @@ namespace Server
             return this.ySpeed;
         }
 
+        public void setCurrentX(int currentX)
+        {
+            this.currentX = currentX;
+        }
+
+        public int getCurrentX()
+        {
+            return this.currentX;
+        }
+
+        public void setCurrentY(int currentY)
+        {
+            this.currentY = currentY;
+        }
+
+        public int getCurrentY()
+        {
+            return this.currentY;
+        }
+
+        public void setIsAlive(bool isAlive)
+        {
+            this.isAlive = isAlive;
+        }
+
+        public bool getIsAlive()
+        {
+            return this.isAlive;
+        }
+
+        public System.Drawing.Point getInitialPosition()
+        {
+            return this.initialPosition;
+        }
+
         private System.Drawing.Point setPosition(int position)
         {
-            return new System.Drawing.Point((position % 9) * 40 + 8, ((position / 9) +1) * 40);
+            this.currentX = (position % 9) * 40 + 8;
+            this.currentY = ((position / 9) + 1) * 40;
+            return new System.Drawing.Point(this.currentX, this.currentY);
         }
 
         private System.Drawing.Size setSize(int xSize, int ySize)
@@ -295,16 +411,20 @@ namespace Server
 
         public void objectRectangleChangeXBySpeed(int speed)
         {
+            this.currentX += speed;
             this.objectRectangle.X += speed;
         }
 
         public void objectRectangleChangeYBySpeed(int speed)
         {
+            this.currentY += speed;
             this.objectRectangle.Y += speed;
         }
 
         public void setInitialPosition()
         {
+            this.currentX = this.initialPosition.X;
+            this.currentY = this.initialPosition.Y;
             this.objectRectangle.X = this.initialPosition.X;
             this.objectRectangle.Y = this.initialPosition.Y;
         }
@@ -313,6 +433,7 @@ namespace Server
     class ServerPacman 
     {
         private List<PacmanObject> objects;
+        private List<PacmanObject> whatToSend;
         private int numPlayers;
         private int boardRight;
         private int boardBottom;
@@ -343,7 +464,7 @@ namespace Server
         ----+----+----+----+----+----+----+----+----
          63 | 64 | 65 | 66 | 67 | 68 | 69 | 70 | 71 
         */
-        public void setLevel1()
+        public List<PacmanObject> setLevel1()
         {
             setBoardsLimits(320, 320, 0, 40);
             //List with coins positions for level 1
@@ -382,6 +503,7 @@ namespace Server
             setGhosts("redGhost", 5, 0, 180, 73);
 
             setPacmans(this.numPlayers);
+            return this.objects;
         }
 
         private void setBoardsLimits(int boardRight, int boardBottom, int boardLeft, int boardTop)
@@ -409,6 +531,7 @@ namespace Server
 
         public List<PacmanObject> updateGame(Dictionary<int, List<bool>> roundMoves)
         {
+            this.whatToSend = new List<PacmanObject>();
             foreach (PacmanObject pacmanObject in this.objects)
             {
                 //move the ghosts in the correct direction
@@ -436,9 +559,10 @@ namespace Server
                     {
                         pacmanObject.setYSpeed(-pacmanObject.getYSpeed());
                     }
+                    this.whatToSend.Add(pacmanObject);
                 }
                 //check the collisions with the alive pacmans
-                else if (pacmanObject is PacmanObject && pacmanObject.getTag() == "pacman")
+                else if (pacmanObject is PacmanObject && pacmanObject.getTag() == "pacman" && pacmanObject.getIsAlive())
                 {
                     int gameID;
                     bool isNumber = Int32.TryParse(pacmanObject.getName(), out gameID);
@@ -486,20 +610,25 @@ namespace Server
                             {
                                 //pacman dies
                                 pacmanObject.setInitialPosition();
+                                pacmanObject.setIsAlive(false);
                             }
                         }
-                        if (x is PacmanObject && x.getTag() == "coin")
+                        if (x is PacmanObject && x.getTag() == "coin" && x.getIsAlive())
                         {
                             if (x.getObjectRectangle().IntersectsWith(pacmanObject.getObjectRectangle()))
                             {
-                                this.objects.Remove(x);
+                                //removes coin
+                                this.whatToSend.Add(x);
+                                x.setIsAlive(false);
                                 pacmanObject.setScore(pacmanObject.getScore()+1);
                             }
                         }
                     }
+                    this.whatToSend.Add(pacmanObject);
                 }
             }
-            return this.objects;
+           
+            return this.whatToSend;
         }
     }
 }

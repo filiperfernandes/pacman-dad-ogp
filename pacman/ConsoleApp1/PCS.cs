@@ -1,5 +1,4 @@
-using RemotingInterfaces;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,9 +12,30 @@ using System.Threading;
 
 namespace pacman
 {
-    public class PCS : MarshalByRefObject, IPCS
+    class PCS : MarshalByRefObject
     {
-        public static string pcs_url = "localhost";
+        public static void createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, Boolean cli)
+        {
+
+            string args = pid + " " + pcs_url + " " + cli_srv_url + msec_per_round + num_players;
+            string exe_path;
+
+            if (cli)
+            {
+                exe_path = Client.exe_path();
+            }
+            else
+            {
+                exe_path = Server.exe_path();
+            }
+            
+
+            ProcessStartInfo info = new ProcessStartInfo(exe_path, args);
+            info.CreateNoWindow = false;
+
+            Process.Start(info);
+        }
+
         public static string GetLocalIPAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -29,29 +49,23 @@ namespace pacman
             return "localhost";
         }
 
-        public static string getUrl()
-        {
-            return pcs_url;
-        }
-
-        public PCS(string url)
-        {
-            pcs_url = url;
-        }
-        public PCS() : base() { }
-
         public static void Main(string[] args)
         {
             Console.Clear();
             Console.WriteLine();
             Console.WriteLine("PCS");
-            Console.WriteLine(args[0]);
+            Console.WriteLine("listening on tcp://" + PCS.GetLocalIPAddress() + ":11000/pcs");
 
-            TcpChannel channel = new TcpChannel(11000);
+            TcpChannel channel = new TcpChannel(1100);
             ChannelServices.RegisterChannel(channel, false);
 
             PCS pcs = new PCS();
-            RemotingServices.Marshal(pcs, "pcs", typeof(IPCS));
+            RemotingServices.Marshal(pcs, "pcs");
+
+            createReplica("", "", "", 10, 10, false);
+            createReplica("","","",10,10, true);
+            createReplica("", "", "", 10, 10, true);
+
 
             // Dont close console
             Console.ReadLine();
@@ -61,24 +75,6 @@ namespace pacman
             RemotingServices.Disconnect(pcs);
             ChannelServices.UnregisterChannel(channel);
             channel = null;
-        }
-
-        void IPCS.createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, int cli)
-        {
-            string args = cli_srv_url+" "+msec_per_round+ " "+ num_players + " "+cli;
-
-            string exe_path;
-
-            exe_path = Replica.exe_path();
-            ProcessStartInfo info = new ProcessStartInfo(exe_path, args);
-            info.CreateNoWindow = false;
-
-            Process.Start(info);
-        }
-
-        public static string exe_path()
-        {
-            return @Environment.CurrentDirectory + "/PCS.exe";
         }
     }
 }

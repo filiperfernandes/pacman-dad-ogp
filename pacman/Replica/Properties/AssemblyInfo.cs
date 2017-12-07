@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PCS")]
+[assembly: AssemblyTitle("Replica")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Vagrant")]
-[assembly: AssemblyProduct("PCS")]
+[assembly: AssemblyProduct("Replica")]
 [assembly: AssemblyCopyright("Copyright © Vagrant 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4e483b22-39f2-4f55-93d7-5b643441bb30")]
+[assembly: Guid("74beebb3-1d84-44e0-8af7-cb10e4649238")]
 
 // Version information for an assembly consists of the following four values:
 //
