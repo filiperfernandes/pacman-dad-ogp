@@ -226,6 +226,7 @@ namespace pacman {
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            ClientServices.isInitialize = true;
 
         }
         private void Form1_Closed(object sender, EventArgs e)
@@ -249,6 +250,7 @@ namespace pacman {
     {
         public static Form1 form;
         public static List<IClient> players;
+        public static bool isInitialize = false;
         List<string> messages;
 
         public ClientServices()
@@ -308,14 +310,27 @@ namespace pacman {
         
         public void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend)
         {
-            form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
+            if (isInitialize)
+            {
+                form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
+            }
+            
             //DelDoRound delDoRound = new DelDoRound(form.timer1_Tick);
             //delDoRound(whatToSend);
         }
 
         public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList)
         {
-            form.Invoke(new DelSetInitialGame(form.setInitialGame), myList);
+            if (isInitialize)
+            {
+                form.Invoke(new DelSetInitialGame(form.setInitialGame), myList);
+            }
+            else
+            {
+                Thread.Sleep(1000);
+                setInitialGame(myList);
+            }
+            
             //DelSetInitialGame delSetInitialGame = new DelSetInitialGame(form.setInitialGame);
             //delSetInitialGame(myList);
         }

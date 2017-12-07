@@ -15,6 +15,7 @@ namespace pacman
 {
     public class Server
     {
+        private Object thisLock = new Object();
         private static Timer enoughPlayersTimer;
         private static Timer myTimer;
         // Dictionary key: player gameID, value: moves of the player
@@ -67,8 +68,8 @@ namespace pacman
             int port = Int32.Parse(words[4]);
             num_players = Int32.Parse(args[2]);
 
-            game = new ServerPacman(1);
-            enoughPlayersTimer = new Timer(20);
+            game = new ServerPacman(num_players);
+            enoughPlayersTimer = new Timer(msec_per_round);
             enoughPlayersTimer.Elapsed += checkIfEnoughPlayers;
             enoughPlayersTimer.AutoReset = true;
             enoughPlayersTimer.Enabled = true;
@@ -136,32 +137,23 @@ namespace pacman
                 }
                 roundMoves = new Dictionary<int, List<bool>>();
             }
-            /*if(allRoundsMoves.Count == 10)
-            {
-                foreach (KeyValuePair<int, Dictionary<int, List<bool>>> round in allRoundsMoves)
-                {
-                    Console.WriteLine("Round = {0}", round.Key);
-                    foreach (KeyValuePair<int, List<bool>> player in round.Value)
-                    {
-                        Console.WriteLine("GameID = {0}, moves = [{1}, {2}, {3}, {4}]", player.Key,
-                            player.Value[0].ToString(), player.Value[1].ToString(),
-                            player.Value[2].ToString(), player.Value[3].ToString());
-                    }
-                }
-            }*/
         }
 
         public void AddMoves(int gameID, List<bool> moves)
         {
-            for (int i = 0; i < roundMoves.Count; i++)
+            lock (thisLock)
             {
                 if (roundMoves.ContainsKey(gameID))
                 {
                     roundMoves[gameID] = moves;
                     return;
                 }
+                else
+                {
+                    roundMoves.Add(gameID, moves);
+                }
             }
-            roundMoves.Add(gameID, moves);
+            
         }
 
         public void RegisterClient(int gameID, string NewClientName)
@@ -635,10 +627,7 @@ namespace pacman
                     this.whatToSend.Add(pacmanObject);
                 }
             }
-            /*foreach (PacmanObject x in this.whatToSend)
-            {
-                Console.WriteLine("Name: {0}", x.getName());
-            }*/
+           
             return this.whatToSend;
         }
     }

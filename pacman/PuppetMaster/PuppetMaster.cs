@@ -185,8 +185,9 @@ namespace pacman
                 "tcp://localhost:"+port+"/Server") as IServer;
                 try
                 {
-                    remote.Crash();
+
                     pidToUrl.Remove(pid);
+                    remote.Crash();
                 }
                 catch (Exception ex) { };
             }
