@@ -1,5 +1,7 @@
-﻿namespace pacman {
-    partial class Form1 {
+﻿namespace pacman
+{
+    partial class Form1
+    {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -9,8 +11,10 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing) {
-            if (disposing && (components != null)) {
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
                 components.Dispose();
             }
             base.Dispose(disposing);
@@ -22,7 +26,8 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent() {
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.label1 = new System.Windows.Forms.Label();
@@ -83,9 +88,6 @@
             this.pictureBox60 = new System.Windows.Forms.PictureBox();
             this.tbMsg = new System.Windows.Forms.TextBox();
             this.tbChat = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pinkGhost)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.yellowGhost)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.redGhost)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox13)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox15)).BeginInit();
@@ -167,29 +169,14 @@
             // pinkGhost
             // 
             this.pinkGhost.Image = global::pacman.Properties.Resources.pink_guy;
-            this.pinkGhost.Location = new System.Drawing.Point(0, 0);
-            this.pinkGhost.Name = "pinkGhost";
-            this.pinkGhost.Size = new System.Drawing.Size(100, 50);
-            this.pinkGhost.TabIndex = 0;
-            this.pinkGhost.TabStop = false;
             // 
             // yellowGhost
             // 
             this.yellowGhost.Image = global::pacman.Properties.Resources.yellow_guy;
-            this.yellowGhost.Location = new System.Drawing.Point(0, 0);
-            this.yellowGhost.Name = "yellowGhost";
-            this.yellowGhost.Size = new System.Drawing.Size(100, 50);
-            this.yellowGhost.TabIndex = 0;
-            this.yellowGhost.TabStop = false;
             // 
             // redGhost
             // 
             this.redGhost.Image = global::pacman.Properties.Resources.red_guy;
-            this.redGhost.Location = new System.Drawing.Point(0, 0);
-            this.redGhost.Name = "redGhost";
-            this.redGhost.Size = new System.Drawing.Size(100, 50);
-            this.redGhost.TabIndex = 0;
-            this.redGhost.TabStop = false;
             // 
             // pictureBox13
             // 
@@ -758,7 +745,6 @@
             this.tbChat.Name = "tbChat";
             this.tbChat.Size = new System.Drawing.Size(100, 255);
             this.tbChat.TabIndex = 144;
-            this.tbChat.TextChanged += new System.EventHandler(this.tbChat_TextChanged);
             // 
             // Form1
             // 
@@ -774,9 +760,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyisdown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.keyisup);
-            ((System.ComponentModel.ISupportInitialize)(this.pinkGhost)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.yellowGhost)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.redGhost)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox13)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox14)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox15)).EndInit();
@@ -833,7 +816,7 @@
         }
 
         #endregion
-        
+
         private System.Windows.Forms.PictureBox redGhost;
         private System.Windows.Forms.PictureBox yellowGhost;
         private System.Windows.Forms.PictureBox pinkGhost;

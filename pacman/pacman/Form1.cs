@@ -156,7 +156,7 @@ namespace pacman {
                 }
                 else if (pacmanObject.Item1 == "coin")
                 {
-                    picture.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
+                    picture.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox56.Image")));
                 }
                 this.Controls.Add(picture);
             }
