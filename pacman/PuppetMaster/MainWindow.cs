@@ -53,7 +53,7 @@ namespace pacman
             String[] words = PuppetMaster.splitInputBox(input_box.Text);
 
 
-            PuppetMaster.cmdStartServer(words[1], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
+            PuppetMaster.cmdStartServer(words[0], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
         }
 
         private void btn_start_client_Click(object sender, EventArgs e)

@@ -22,6 +22,7 @@ namespace RemotingInterfaces
         void Crash();
         int isAlive();
     }
+   
 
     public interface IPCS
     {
