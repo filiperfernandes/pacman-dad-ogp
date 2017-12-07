@@ -37,13 +37,7 @@ namespace pacman
             Application.SetCompatibleTextRenderingDefault(false);
             main = new MainWindow();
             Application.Run(main);
-            //printPM("Cheguei");
-            Console.WriteLine("Cheguei");
-
-            //Console.WriteLine("Cheguei");
-            //while (true) { readConsole(); };
-            //readConsole();
-            //Console.ReadLine();
+            printPM("Cheguei",1);
         }
 
         private static void consoleApp()
@@ -51,7 +45,7 @@ namespace pacman
             string input;
             while (true) {
                 input = Console.ReadLine();
-                readConsole(input); };
+                readConsole(input, 1); };
         }
 
         static public string[] splitInputBox (string input)
@@ -62,38 +56,38 @@ namespace pacman
             return words;
         }
 
-        public static void readConsole(string input)
+        public static void readConsole(string input, int src)
         {
             string[] words = splitInputBox(input);
 
             switch (words[0])
             {
                 case "StartClient":
-                    cmdStartClient(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]));
+                    cmdStartClient(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]), src);
                     break;
                 case "StartServer":
-                    cmdStartServer(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]));
+                    cmdStartServer(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]), src);
                     break;
                 case "GlobalStatus":
-                    cmdGlobalStatus();
+                    cmdGlobalStatus(src);
                     break;
                 case "Crash":
-                    cmdCrash(words[1]);
+                    cmdCrash(words[1], src);
                     break;
                 case "Freeze":
-                    cmdFreeze(words[1]);
+                    cmdFreeze(words[1], src);
                     break;
                 case "Unfreeze":
-                    cmdUnfreeze(words[1]);
+                    cmdUnfreeze(words[1], src);
                     break;
                 case "InjectDelay":
-                    cmdInjectDelay(words[1], words[2]);
+                    cmdInjectDelay(words[1], words[2], src);
                     break;
                 case "LocalState":
-                    cmdLocalState(words[1], Int32.Parse(words[2]));
+                    cmdLocalState(words[1], Int32.Parse(words[2]),src);
                     break;
                 case "Wait":
-                    cmdWait(Int32.Parse(words[1]));
+                    cmdWait(Int32.Parse(words[1]), src);
                     break;
                 default:
                     Console.WriteLine("Command not found!");
@@ -102,48 +96,41 @@ namespace pacman
 
         }
 
-        public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
+        public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players, int src)
         {
-            //printPM("Starting Client");
-            Console.WriteLine("Starting Client");
-
             pidToUrl.Add(pid, client_url);
             activeClient.Add(client_url);
 
-            //printPM("Checking for PCS");
-            Console.WriteLine("Checking for PCS");
-            remote = checkPCS(pcs_url);
-            //printPM(pcs_url);
-            Console.WriteLine(pcs_url);
+            printPM("Starting Client", src);
+            printPM("Checking for PCS", src);
 
+            remote = checkPCS(pcs_url);
+            //Console.WriteLine(pcs_url);
 
             remote.createReplica(pid, pcs_url, client_url, msec_per_round, num_players, 1);
 
         }
 
-        public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
+        public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players, int src)
         {
-            //printPM("Starting Server");
-            Console.WriteLine("Starting Client");
 
             pidToUrl.Add(pid, server_url);
             activeServer.Add(server_url);
 
-            //printPM("Checking for PCS");
-            Console.WriteLine("Checking for PCS");
+            printPM("Starting Server", src);
+            printPM("Checking for PCS", src);
+
             remote = checkPCS(pcs_url);
-            //printPM(pcs_url);
-            Console.WriteLine(pcs_url);
+            //Console.WriteLine(pcs_url);
 
             remote.createReplica(pid, pcs_url, server_url, msec_per_round, num_players, 0);
 
         }
 
-        static public void cmdGlobalStatus()
+        static public void cmdGlobalStatus(int src)
         {
-            //printPM("Global Status");
-            Console.WriteLine("Global Status");
-
+            printPM("Global Status", src);
+            
             Replica r = new Replica();
 
             int s = 1;
@@ -163,13 +150,14 @@ namespace pacman
                 c += 1;
             }
 
-            Console.WriteLine("Everything okay with: " + active);
-            Console.WriteLine("Might be down: " + inactive);
+            printPM("Everything okay with: " + active, src);
+            printPM("Might be down: " + inactive, src);
+
         }
 
-        public static void cmdCrash(string pid)
+        public static void cmdCrash(string pid, int src)
         {
-            Console.WriteLine("Crashing");
+            printPM("Crashing" + pid, src);
 
             string stringCutted = pidToUrl[pid].Split('/').Last();
             Console.WriteLine(stringCutted);
@@ -209,33 +197,31 @@ namespace pacman
             }
         }
 
-        static public void cmdFreeze(string pid)
+        static public void cmdFreeze(string pid, int src)
         {
-            Console.WriteLine("Freezing");
-
+            printPM("Freezing" + pid, src);
         }
 
-        static public void cmdUnfreeze(string pid)
+        static public void cmdUnfreeze(string pid, int src)
         {
-            Console.WriteLine("Unfreezing CLient");
+            printPM("Unfreezing" + pid, src);
         }
 
-        static public void cmdInjectDelay(string src_pid, string dst_pid)
+        static public void cmdInjectDelay(string src_pid, string dst_pid, int src)
         {
-            Console.WriteLine("Injecting Delay");
-
+            printPM("Injecting Delay from:" + src_pid + " to:" + dst_pid, src);
         }
 
-        static public void cmdLocalState(string pid, int round_id)
+        static public void cmdLocalState(string pid, int round_id, int src)
         {
-            Console.WriteLine("LocalState");
-
+            printPM("LocalState of:" + pid + " on round:" + round_id, src);
         }
 
-        static public void cmdWait(int x_ms)
+        static public void cmdWait(int x_ms, int src)
         {
-            Console.WriteLine("Sleeping for " + x_ms.ToString());
 
+            printPM("Sleeping for " + x_ms.ToString(), src);
+            
             System.Threading.Thread.Sleep(x_ms);
 
         }
@@ -264,10 +250,19 @@ namespace pacman
 
         }
 
-        static public void printPM(string text)
+        static public void printPM(string text, int src)
         {
-            Console.WriteLine(text);
-            main.output_box.Text += text +  "\r\n";
+
+            if (src == 1)
+            {
+                Console.WriteLine(text);
+            }
+            else
+            {
+                main.output_box.AppendText(text + "\r\n");
+            }
+            //Console.WriteLine(text);
+            //main.output_box.Text += text +  "\r\n";           
         }
     }
 }

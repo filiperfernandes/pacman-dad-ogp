@@ -23,6 +23,7 @@ namespace pacman
         private static Dictionary<int, IClient> clients;
         private static ServerPacman game;
         private static int num_players;
+        private static int msec_per_round;
 
         public Server(string url, int port)
         {
@@ -58,7 +59,7 @@ namespace pacman
         static void Main(string[] args)
         {
             string url = args[0];
-            int msec_per_round = Int32.Parse(args[1]);
+            msec_per_round = Int32.Parse(args[1]);
             //int num_players = Int32.Parse(args[2]);
 
             char[] delimiterChars = { ':', '/' };
@@ -108,7 +109,7 @@ namespace pacman
                     ((IClient)clients[key]).setInitialGame(myList);
                 }
                 //System.Threading.Thread.Sleep(1000);
-                myTimer = new Timer(20);
+                myTimer = new Timer(msec_per_round);
                 myTimer.Elapsed += AtualizaJogo;
                 myTimer.AutoReset = true;
                 myTimer.Enabled = true;

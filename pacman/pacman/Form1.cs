@@ -113,18 +113,19 @@ namespace pacman {
         private PictureBox setPacmanImage(PictureBox picture, string pacmanName)
         {
             picture.SizeMode = PictureBoxSizeMode.Zoom;
-            if (pacmanName == "1")
-            {
-                picture.Image = Properties.Resources.Left;
-            }
-            else if (pacmanName == "2")
-            {
-                picture.Image = Properties.Resources.Left;
-            }
-            /*else if (pacmanName == "3")
-            {
-                picture.Image = global::pacman.Properties.Resources.red_guy;
-            }*/
+            //if (pacmanName == "1")
+            //{
+            //    picture.Image = Properties.Resources.Left;
+            //}
+            //else if (pacmanName == "2")
+            //{
+            //    picture.Image = Properties.Resources.Left;
+            //}
+            ///*else if (pacmanName == "3")
+            //{
+            //    picture.Image = global::pacman.Properties.Resources.red_guy;
+            //}*/
+            picture.Image = Properties.Resources.Left;
             return picture;
         }
 

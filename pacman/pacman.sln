@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS", "PCS\PCS.csproj", "{4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Replica", "Replica\Replica.csproj", "{74BEEBB3-1D84-44E0-8AF7-CB10E4649238}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS", "PCS\PCS.csproj", "{A907C8B1-EFEB-4C2E-90B0-37ADBCADB14A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
