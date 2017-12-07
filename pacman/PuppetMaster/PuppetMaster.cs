@@ -48,7 +48,10 @@ namespace pacman
 
         private static void consoleApp()
         {
-            while (true) { readConsole(); };
+            string input;
+            while (true) {
+                input = Console.ReadLine();
+                readConsole(input); };
         }
 
         static public string[] splitInputBox (string input)
@@ -59,9 +62,9 @@ namespace pacman
             return words;
         }
 
-        private static void readConsole()
+        public static void readConsole(string input)
         {
-            string[] words = splitInputBox(Console.ReadLine());
+            string[] words = splitInputBox(input);
 
             switch (words[0])
             {

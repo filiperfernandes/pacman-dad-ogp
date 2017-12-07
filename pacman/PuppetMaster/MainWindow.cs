@@ -45,6 +45,13 @@ namespace pacman
 
         private void btn_load_Click(object sender, EventArgs e)
         {
+            string[] lines = System.IO.File.ReadAllLines(input_box.Text);
+
+            foreach (string line in lines)
+            {
+                file_box.Text += line + "\r\n";
+                
+            }
 
         }
 
@@ -73,11 +80,30 @@ namespace pacman
 
         private void btn_run_command_Click(object sender, EventArgs e)
         {
+            string commands = file_box.Text;
+
+            string[] delimiterChars = new string[] { "\r\n" };
+            string[] lines = commands.Split(delimiterChars, StringSplitOptions.None);
+
+            foreach (String line in lines)
+            {
+
+                PuppetMaster.readConsole(line); 
+                
+            }
 
         }
-
+        static int i = 0;
         private void btn_next_command_Click(object sender, EventArgs e)
         {
+            string commands = file_box.Text;
+
+            string[] delimiterChars = new string[] { "\r\n" };
+            string[] lines = commands.Split(delimiterChars, StringSplitOptions.None);
+
+            
+            PuppetMaster.readConsole(lines[i]);
+            i++;
 
         }
 

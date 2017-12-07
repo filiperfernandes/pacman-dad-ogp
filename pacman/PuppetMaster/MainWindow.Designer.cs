@@ -165,10 +165,10 @@
             // 
             // file_box
             // 
-            this.file_box.Location = new System.Drawing.Point(410, 51);
+            this.file_box.Location = new System.Drawing.Point(385, 51);
             this.file_box.Multiline = true;
             this.file_box.Name = "file_box";
-            this.file_box.Size = new System.Drawing.Size(321, 235);
+            this.file_box.Size = new System.Drawing.Size(355, 245);
             this.file_box.TabIndex = 12;
             this.file_box.TextChanged += new System.EventHandler(this.file_box_TextChanged);
             // 
