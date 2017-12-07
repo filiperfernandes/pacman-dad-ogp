@@ -62,7 +62,7 @@ namespace pacman
             char[] delimiterChars = { ' ', '\t' };
 
             string[] words = input.Split(delimiterChars);
-            PuppetMaster.cmdStartServer(words[1], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
+            PuppetMaster.cmdStartClient(words[0], words[1], words[2], Int32.Parse(words[3]), Int32.Parse(words[4]));
         }
         
         private void btn_unfreeze_Click(object sender, EventArgs e)
