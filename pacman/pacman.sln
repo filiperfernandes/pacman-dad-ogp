@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS", "PCS\PCS.csproj", "{4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Replica", "Replica\Replica.csproj", "{74BEEBB3-1D84-44E0-8AF7-CB10E4649238}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS", "PCS\PCS.csproj", "{A907C8B1-EFEB-4C2E-90B0-37ADBCADB14A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,7 @@ Global
 		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECE5A838-E181-493A-B9A2-6ADD01DE37F6}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83EED692-BB0C-4008-A3A4-FABA3CA398AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
