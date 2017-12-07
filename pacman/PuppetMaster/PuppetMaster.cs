@@ -200,11 +200,83 @@ namespace pacman
         static public void cmdFreeze(string pid, int src)
         {
             printPM("Freezing" + pid, src);
+
+            string stringCutted = pidToUrl[pid].Split('/').Last();
+            Console.WriteLine(stringCutted);
+
+            char[] delimiterChars = { ':', '/' };
+            string[] words = pidToUrl[pid].Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+
+            if (stringCutted.Equals("Server"))
+            {
+                //IServer remote = RemotingServices.Connect(typeof(IServer),
+                //pidToUrl[pid]) as IServer;
+                IServer remote = RemotingServices.Connect(typeof(IServer),
+                    "tcp://localhost:" + port + "/Server") as IServer;
+
+                try
+                {
+                    remote.Freeze();
+                }
+                catch (Exception ex) { };
+            }
+            else
+            {
+                IClient remote = RemotingServices.Connect(typeof(IClient),
+                    "tcp://localhost:" + port + "/Client") as IClient;
+                try
+                {
+                    remote.Freeze();
+                }
+                catch (Exception ex) { };
+                //IClient client = (IClient)Activator.GetObject(typeof(IClient), pidToUrl[pid]);
+                //client.Crash();
+            }
         }
 
         static public void cmdUnfreeze(string pid, int src)
         {
             printPM("Unfreezing" + pid, src);
+
+            string stringCutted = pidToUrl[pid].Split('/').Last();
+            Console.WriteLine(stringCutted);
+
+            char[] delimiterChars = { ':', '/' };
+            string[] words = pidToUrl[pid].Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+
+            if (stringCutted.Equals("Server"))
+            {
+                //IServer remote = RemotingServices.Connect(typeof(IServer),
+                //pidToUrl[pid]) as IServer;
+                IServer remote = RemotingServices.Connect(typeof(IServer),
+                    "tcp://localhost:" + port + "/Server") as IServer;
+
+                try
+                {
+                    remote.Unfreeze();
+                }
+                catch (Exception ex) { };
+            }
+            else
+            {
+                IClient remote = RemotingServices.Connect(typeof(IClient),
+                    "tcp://localhost:" + port + "/Client") as IClient;
+                try
+                {
+                    remote.Unfreeze();
+                }
+                catch (Exception ex) { };
+                //IClient client = (IClient)Activator.GetObject(typeof(IClient), pidToUrl[pid]);
+                //client.Crash();
+            }
         }
 
         static public void cmdInjectDelay(string src_pid, string dst_pid, int src)

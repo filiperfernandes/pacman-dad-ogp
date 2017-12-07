@@ -35,7 +35,7 @@ namespace pacman
 
         private void btn_freeze_Click(object sender, EventArgs e)
         {
-
+            PuppetMaster.cmdFreeze(input_box.Text, 0);
         }
         
         private void btn_wait_Click(object sender, EventArgs e)
@@ -78,7 +78,7 @@ namespace pacman
         
         private void btn_unfreeze_Click(object sender, EventArgs e)
         {
-
+            PuppetMaster.cmdUnfreeze(input_box.Text, 0);
         }
 
         private void btn_run_command_Click(object sender, EventArgs e)

@@ -51,39 +51,54 @@ namespace pacman {
         }
 
         private void keyisdown(object sender, KeyEventArgs e) {
-            if (e.KeyCode == Keys.Left) {
-                moves[0] = true;
-                //pacman.Image = Properties.Resources.Left;
-            }
-            if (e.KeyCode == Keys.Right) {
-                moves[1] = true;
-                //pacman.Image = Properties.Resources.Right;
-            }
-            if (e.KeyCode == Keys.Up) {
-                moves[2] = true;
-                //pacman.Image = Properties.Resources.Up;
-            }
-            if (e.KeyCode == Keys.Down) {
-                moves[3] = true;
-                //pacman.Image = Properties.Resources.down;
-            }
-            if (e.KeyCode == Keys.Enter) {
-                tbMsg.Enabled = true; tbMsg.Focus();
+            if (ClientServices.processing)
+            {
+                if (e.KeyCode == Keys.Left)
+                {
+                    moves[0] = true;
+                    //pacman.Image = Properties.Resources.Left;
+                }
+                if (e.KeyCode == Keys.Right)
+                {
+                    moves[1] = true;
+                    //pacman.Image = Properties.Resources.Right;
+                }
+                if (e.KeyCode == Keys.Up)
+                {
+                    moves[2] = true;
+                    //pacman.Image = Properties.Resources.Up;
+                }
+                if (e.KeyCode == Keys.Down)
+                {
+                    moves[3] = true;
+                    //pacman.Image = Properties.Resources.down;
+                }
+                if (e.KeyCode == Keys.Enter)
+                {
+                    tbMsg.Enabled = true; tbMsg.Focus();
+                }
             }
         }
 
         private void keyisup(object sender, KeyEventArgs e) {
-            if (e.KeyCode == Keys.Left) {
-                moves[0] = false;
-            }
-            if (e.KeyCode == Keys.Right) {
-                moves[1] = false;
-            }
-            if (e.KeyCode == Keys.Up) {
-                moves[2] = false;
-            }
-            if (e.KeyCode == Keys.Down) {
-                moves[3] = false;
+            if (ClientServices.processing)
+            {
+                if (e.KeyCode == Keys.Left)
+                {
+                    moves[0] = false;
+                }
+                if (e.KeyCode == Keys.Right)
+                {
+                    moves[1] = false;
+                }
+                if (e.KeyCode == Keys.Up)
+                {
+                    moves[2] = false;
+                }
+                if (e.KeyCode == Keys.Down)
+                {
+                    moves[3] = false;
+                }
             }
         }
 
@@ -253,6 +268,7 @@ namespace pacman {
         public static List<IClient> players;
         public static bool isInitialize = false;
         List<string> messages;
+        public static Boolean processing = true;
 
         public ClientServices()
         {
@@ -313,7 +329,10 @@ namespace pacman {
         {
             if (isInitialize)
             {
-                form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
+                if (ClientServices.processing)
+                { 
+                    form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
+                }
             }
             
             //DelDoRound delDoRound = new DelDoRound(form.timer1_Tick);
@@ -345,6 +364,16 @@ namespace pacman {
         public int isAlive()
         {
             return 1;
+        }
+
+        public void Freeze()
+        {
+            ClientServices.processing = false;
+        }
+
+        public void Unfreeze()
+        {
+            ClientServices.processing = true;
         }
     }
 }
