@@ -31,17 +31,23 @@ namespace pacman
         [STAThread]
         static void Main()
         {
+            var th = new Thread(consoleApp);
+            th.Start();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             main = new MainWindow();
             Application.Run(main);
 
+            //Console.WriteLine("Cheguei");
+            //while (true) { readConsole(); };
+            //readConsole();
+            //Console.ReadLine();
+        }
+
+        private static void consoleApp()
+        {
             Console.WriteLine("Cheguei");
             while (true) { readConsole(); };
-            readConsole();
-            //Console.ReadLine();
-
-
         }
 
         //static void Main()
@@ -107,6 +113,7 @@ namespace pacman
         public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players)
         {
             Console.WriteLine("Starting Client" + client_url);
+            main.output_box.Text += "Starting Client \r\n";
 
             pidToUrl.Add(pid, client_url);
             activeClient.Add(client_url);
@@ -121,8 +128,7 @@ namespace pacman
 
         public static void cmdStartServer(string pid, string pcs_url, string server_url, int msec_per_round, int num_players)
         {
-            Console.WriteLine("Starting Server" + server_url);
-            main.output_box.Text = "Starting Server";
+            printPM("Starting Server");
 
             pidToUrl.Add(pid, server_url);
             activeServer.Add(server_url);
@@ -166,6 +172,7 @@ namespace pacman
         public static void cmdCrash(string pid)
         {
             Console.WriteLine("Crashing");
+            main.output_box.Text += "Crashing \r\n";
             //TODO: Check if Server or client to properly kill
 
             string stringCutted = pidToUrl[pid].Split('/').Last();
@@ -198,8 +205,8 @@ namespace pacman
                 try
                 {
                     Console.WriteLine(pidToUrl[pid]);
-                    remote.Crash();
                     pidToUrl.Remove(pid);
+                    remote.Crash();          
                 }
                 catch (Exception ex) { };
             //IClient client = (IClient)Activator.GetObject(typeof(IClient), pidToUrl[pid]);
@@ -210,13 +217,16 @@ namespace pacman
         static public void cmdFreeze(string pid)
         {
             Console.WriteLine("Freezing");
+            main.output_box.Text += "Freezing \r\n";
+
             //th.Suspend();
 
         }
 
         static public void cmdUnfreeze(string pid)
         {
-            Console.WriteLine("Starting CLient");
+            Console.WriteLine("Unfreezing CLient");
+            main.output_box.Text += "Unfreezing \r\n";
 
         }
 
@@ -264,6 +274,12 @@ namespace pacman
                 return pcs[pcs_url];
             }
 
+        }
+
+        static private void printPM(string text)
+        {
+            Console.WriteLine(text);
+            main.output_box.Text += text +  "\r\n";
         }
     }
 }
