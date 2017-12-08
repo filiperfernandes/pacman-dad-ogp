@@ -188,12 +188,18 @@ namespace pacman {
                 }
                 else if (x is PictureBox && (string)x.Tag == "pacman" && whatToSend.ContainsKey(x.Name))
                 {
-                    label1.Text = "Score: " + whatToSend[x.Name].Item2;
                     x.Location = new System.Drawing.Point(whatToSend[x.Name].Item3, whatToSend[x.Name].Item4);
+                    
+
+
                 }
                 else if (x is PictureBox && (string)x.Tag == "ghost" && whatToSend.ContainsKey(x.Name))
                 {
                     x.Location = new System.Drawing.Point(whatToSend[x.Name].Item3, whatToSend[x.Name].Item4);
+                }
+                if(x is PictureBox && (string)x.Tag == "pacman" && x.Name == this.gameID.ToString())
+                {
+                    label1.Text = "Score: " + whatToSend[x.Name].Item2;
                 }
             }
             //moving ghosts and bumping with the walls end
