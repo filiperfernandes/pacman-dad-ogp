@@ -23,8 +23,8 @@ namespace pacman
         private static Dictionary<int, IClient> clients;
         //public static List<int> freezeClients = new List<int>();
         private static ServerPacman game;
-        private static int num_players;
-        private static int msec_per_round;
+        private static int num_players = 2;
+        private static int msec_per_round = 20;
         public static Boolean processing = true;
 
         public Server(string url, int port)
@@ -142,7 +142,12 @@ namespace pacman
                         //    continue;
                         //}
                         //else {
+                        try
+                        {
+                            
                             ((IClient)clients[key]).PlayMoves(whatToSend);
+                        }
+                        catch { }     
                         //}
                         
                     }

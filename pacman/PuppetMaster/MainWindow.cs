@@ -91,8 +91,8 @@ namespace pacman
             foreach (String line in lines)
             {
 
-                PuppetMaster.readConsole(line,0); 
-                
+                PuppetMaster.readConsole(line,0);
+                System.Threading.Thread.Sleep(1000);
             }
 
         }
