@@ -15,7 +15,7 @@ using System.Net;
 
 namespace pacman {
     public static class Client{
-
+        public static int msec_per_round;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -23,7 +23,7 @@ namespace pacman {
         static void Main(string [] args) {
 
             string url = args[0];
-            int msec_per_round = Int32.Parse(args[1]);
+            msec_per_round = Int32.Parse(args[1]);
             //int num_players = Int32.Parse(args[2]);
 
             char[] delimiterChars = { ':', '/' };
