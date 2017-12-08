@@ -26,6 +26,7 @@ namespace pacman
         private static int num_players = 2;
         private static int msec_per_round = 20;
         public static Boolean processing = true;
+        private static int round = 0;
 
         public Server(string url, int port)
         {
@@ -98,19 +99,11 @@ namespace pacman
                         pacmanObject.getCurrentX(), pacmanObject.getCurrentY(),
                         pacmanObject.getObjectRectangle().Width, pacmanObject.getObjectRectangle().Height));
                 }
-                /*if (flag == 0)
-                {
-                    foreach (Tuple<string, string, int, int, int, int, int> x in myList)
-                    {
-                        Console.WriteLine("List: {0} {1} {2} {3} {4} {5} {6}", x.Item1, x.Item2, x.Item3, x.Item4, x.Item5, x.Item6, x.Item7);
-                    }
-                }
-                flag = 1;*/
                 foreach (var key in clients.Keys)
                 {
-                    ((IClient)clients[key]).setInitialGame(myList);
+                    ((IClient)clients[key]).setInitialGame(myList, round);
                 }
-                //System.Threading.Thread.Sleep(1000);
+                round += 1;
                 myTimer = new Timer(msec_per_round);
                 myTimer.Elapsed += AtualizaJogo;
                 myTimer.AutoReset = true;
@@ -144,13 +137,11 @@ namespace pacman
                         //else {
                         try
                         {
-                            
-                            ((IClient)clients[key]).PlayMoves(whatToSend);
+                            ((IClient)clients[key]).PlayMoves(whatToSend, round);
                         }
-                        catch { }     
-                        //}
-                        
+                        catch { }
                     }
+                    round += 1;
                     roundMoves = new Dictionary<int, List<bool>>();
                 }
             }

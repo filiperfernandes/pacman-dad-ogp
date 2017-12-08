@@ -18,6 +18,10 @@ namespace pacman {
         private IClient client;
         private int port;
         private int gameID = 0;
+        //Dicionario de todas as rondas key: ronda, value: Dicionario de um PacmanObject
+        //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
+        //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY  
+        Dictionary<int, Dictionary<string, Tuple<string, int, int, int>>> allRounds;
         List<bool> moves = new List<bool>(new bool[4]);
 
         public Form1(int port) {
@@ -128,26 +132,22 @@ namespace pacman {
         private PictureBox setPacmanImage(PictureBox picture, string pacmanName)
         {
             picture.SizeMode = PictureBoxSizeMode.Zoom;
-            //if (pacmanName == "1")
-            //{
-            //    picture.Image = Properties.Resources.Left;
-            //}
-            //else if (pacmanName == "2")
-            //{
-            //    picture.Image = Properties.Resources.Left;
-            //}
-            ///*else if (pacmanName == "3")
-            //{
-            //    picture.Image = global::pacman.Properties.Resources.red_guy;
-            //}*/
             picture.Image = Properties.Resources.Left;
             return picture;
         }
 
-        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList)
+        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)
         {
+
+            //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
+            //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY 
+            Dictionary<string, Tuple< string, int, int, int>> roundDict =
+                new Dictionary<string, Tuple<string, int, int, int>>();
             foreach (Tuple<string, string, int, int, int, int, int> pacmanObject in myList)
             {
+                roundDict.Add(pacmanObject.Item2, new Tuple<string, int, int, int>(
+                    pacmanObject.Item1, 0, 
+                    pacmanObject.Item4, pacmanObject.Item5));
                 var picture = new PictureBox
                 {
                     BackColor = System.Drawing.Color.Transparent,
@@ -176,8 +176,39 @@ namespace pacman {
                 }
                 this.Controls.Add(picture);
             }
+            allRounds.Add(round, roundDict);
         }
-        
+
+        public void save_Round(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round)
+        {
+            Dictionary<string, Tuple<string, int, int, int>> roundDict;
+            if (round != allRounds.Count)
+            {
+                roundDict = allRounds[allRounds.Count-1];
+                for (int i = allRounds.Count; i < round; i++)
+                {
+                    allRounds.Add(i, roundDict);
+                }
+            }
+            //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
+            //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY 
+            roundDict = new Dictionary<string, Tuple<string, int, int, int>>();
+            foreach (Control x in this.Controls)
+            {
+                if (x is PictureBox && (string)x.Tag == "coin" || (string)x.Tag == "ghost")
+                {
+                    roundDict.Add(x.Name, new Tuple<string, int, int, int>(
+                    (string)x.Tag, 0, x.Location.X, x.Location.Y));
+                }
+                else if (x is PictureBox && (string)x.Tag == "pacman" && whatToSend.ContainsKey(x.Name))
+                {
+                    roundDict.Add(x.Name, new Tuple<string, int, int, int>(
+                    (string)x.Tag, whatToSend[x.Name].Item2, x.Location.X, x.Location.Y));
+                }
+            }
+            allRounds.Add(round, roundDict);
+        }
+
         public void timer1_Tick(Dictionary<string, Tuple<string, int, int, int>> whatToSend)
         {
             foreach (Control x in this.Controls)
@@ -189,9 +220,6 @@ namespace pacman {
                 else if (x is PictureBox && (string)x.Tag == "pacman" && whatToSend.ContainsKey(x.Name))
                 {
                     x.Location = new System.Drawing.Point(whatToSend[x.Name].Item3, whatToSend[x.Name].Item4);
-                    
-
-
                 }
                 else if (x is PictureBox && (string)x.Tag == "ghost" && whatToSend.ContainsKey(x.Name))
                 {
@@ -264,8 +292,9 @@ namespace pacman {
 
     delegate void DelAddMsg(string mensagem);
     delegate void DelSetGameID(int gameID);
+    delegate void DelSaveRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round);
     delegate void DelDoRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend);
-    delegate void DelSetInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList);
+    delegate void DelSetInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round);
 
 
     public class ClientServices : MarshalByRefObject, IClient
@@ -331,7 +360,7 @@ namespace pacman {
             }
         }
         
-        public void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend)
+        public void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round)
         {
             if (isInitialize)
             {
@@ -339,22 +368,23 @@ namespace pacman {
                 { 
                     form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
                 }
+                form.Invoke(new DelSaveRound(form.save_Round), whatToSend, round);
             }
             
             //DelDoRound delDoRound = new DelDoRound(form.timer1_Tick);
             //delDoRound(whatToSend);
         }
 
-        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList)
+        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)
         {
             if (isInitialize)
             {
-                form.Invoke(new DelSetInitialGame(form.setInitialGame), myList);
+                form.Invoke(new DelSetInitialGame(form.setInitialGame), myList, round);
             }
             else
             {
                 Thread.Sleep(1000);
-                setInitialGame(myList);
+                setInitialGame(myList, round);
             }
             
             //DelSetInitialGame delSetInitialGame = new DelSetInitialGame(form.setInitialGame);
