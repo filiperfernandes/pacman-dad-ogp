@@ -154,6 +154,17 @@ namespace pacman {
             picture.Image = Properties.Resources.Left;
             return picture;
         }
+        public void Winner()
+        {
+            label2.Visible = true;
+            label2.Text = "Winner";
+        }
+
+        public void GameOver()
+        {
+            label2.Visible = true;
+            label2.Text = "GAME OVER";
+        }
 
         public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)
         {
@@ -293,6 +304,8 @@ namespace pacman {
     delegate Dictionary<string, Tuple<string, int, int, int>> DelLocalState(int round);
     delegate void DelAddMsg(string mensagem);
     delegate void DelSetGameID(int gameID);
+    delegate void DelWinner();
+    delegate void DelGameOver();
     delegate void DelSaveRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round);
     delegate void DelDoRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend);
     delegate void DelSetInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round);
@@ -384,6 +397,14 @@ namespace pacman {
             
             //DelDoRound delDoRound = new DelDoRound(form.timer1_Tick);
             //delDoRound(whatToSend);
+        }
+        public void GameOver()
+        {
+            form.Invoke(new DelGameOver(form.GameOver));
+        }
+        public void Winner()
+        {
+            form.Invoke(new DelWinner(form.Winner));
         }
 
         public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)

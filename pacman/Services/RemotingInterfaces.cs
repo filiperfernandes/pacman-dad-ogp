@@ -11,6 +11,7 @@ namespace RemotingInterfaces
         int isAlive();
         void Freeze();
         void Unfreeze();
+        
     }
 
     public interface IClient
@@ -25,6 +26,8 @@ namespace RemotingInterfaces
         int isAlive();
         void Freeze();
         void Unfreeze();
+        void GameOver();
+        void Winner();
         Dictionary<string, Tuple<string, int, int, int>> localState(int round);
         void addInputFile(Dictionary<int, List<bool>> clientMoves);
     }
