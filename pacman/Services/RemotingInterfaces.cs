@@ -25,12 +25,13 @@ namespace RemotingInterfaces
         int isAlive();
         void Freeze();
         void Unfreeze();
+        void addInputFile(Dictionary<int, List<bool>> clientMoves);
     }
    
 
     public interface IPCS
     {
-        void createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, int cli);
+        void createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, int cli, string path);
     }
 
     public interface IReplica

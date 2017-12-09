@@ -26,6 +26,7 @@ namespace pacman
         private static List<string> activeClient = new List<string>();
         static IPCS remote;
         static MainWindow main;
+        static int server_port;
 
 
         [STAThread]
@@ -57,13 +58,16 @@ namespace pacman
         }
 
         public static void readConsole(string input, int src)
-        {
+        {  
             string[] words = splitInputBox(input);
+            string path = "";
+            printPM(words.Length.ToString(), 1);
+            if (words.Length > 6) { path = words[6]; }
 
             switch (words[0])
             {
                 case "StartClient":
-                    cmdStartClient(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]), src);
+                    cmdStartClient(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]), path, src);
                     break;
                 case "StartServer":
                     cmdStartServer(words[1], words[2], words[3], Int32.Parse(words[4]), Int32.Parse(words[5]), src);
@@ -89,6 +93,9 @@ namespace pacman
                 case "Wait":
                     cmdWait(Int32.Parse(words[1]), src);
                     break;
+                case "Test":
+                    parseInputFile(words[1]);
+                    break;
                 default:
                     Console.WriteLine("Command not found!");
                     break;
@@ -96,7 +103,7 @@ namespace pacman
 
         }
 
-        public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players, int src)
+        public static void cmdStartClient(string pid, string pcs_url, string client_url, int msec_per_round, int num_players, string path, int src)
         {
             pidToUrl.Add(pid, client_url);
             activeClient.Add(client_url);
@@ -107,7 +114,7 @@ namespace pacman
             remote = checkPCS(pcs_url);
             //Console.WriteLine(pcs_url);
 
-            remote.createReplica(pid, pcs_url, client_url, msec_per_round, num_players, 1);
+            remote.createReplica(pid, pcs_url, client_url, msec_per_round, num_players, 1, path);
 
         }
 
@@ -123,7 +130,9 @@ namespace pacman
             remote = checkPCS(pcs_url);
             //Console.WriteLine(pcs_url);
 
-            remote.createReplica(pid, pcs_url, server_url, msec_per_round, num_players, 0);
+            setServerPort(server_url);
+
+            remote.createReplica(pid, pcs_url, server_url, msec_per_round, num_players,0, "");
 
         }
 
@@ -335,6 +344,53 @@ namespace pacman
             }
             //Console.WriteLine(text);
             //main.output_box.Text += text +  "\r\n";           
+        }
+
+        static private Dictionary<int, List<bool>> parseInputFile(string path)
+        {
+            Dictionary<int, List<bool>> movesPerRound = new Dictionary<int, List<bool>>();
+            List<bool> moves = new List<bool>(new bool[4]);
+
+            string[] fileInput = System.IO.File.ReadAllLines(path);
+            char[] delimiterChars = { ',' };
+            string[] words ;
+            int i = 0;
+            foreach (string line in fileInput)
+            {
+                moves = new List<bool>(new bool[4]);
+                Console.WriteLine(line);
+                words = line.Split(delimiterChars);
+
+                moves[0] = false;
+                moves[1] = false;
+                moves[2] = false;
+                moves[3] = false;
+                if (words[1].Equals("LEFT")) { moves[0] = true; }
+                else if (words[1].Equals("RIGHT")) { moves[1] = true; }
+                else if (words[1].Equals("UP")) { moves[2] = true; }
+                else if (words[1].Equals("DOWN")) { moves[3] = true; }
+
+                //Console.WriteLine("This is round: " + words[0] + "And the move is: " + words[1]);
+                //Console.WriteLine("0:" + moves[0] + " 1:" + moves[1] + " 2:" + moves[2] + "3:" + moves[3]);
+                Console.WriteLine(movesPerRound.Count);
+                movesPerRound.Add(Int32.Parse(words[0]), moves);
+
+            }
+            //foreach (var item in movesPerRound)
+            //{
+            //    Console.WriteLine(item.Key + " " + item.Value[0]+" "+ item.Value[1] + " "+ item.Value[2] + " " + item.Value[3]);
+            //}
+
+            return movesPerRound;
+        }
+
+        static void setServerPort(string url)
+        {
+            char[] delimiterChars = { ':', '/' };
+            string[] words = url.Split(delimiterChars);
+
+            //Setup game settings
+            server_port = Int32.Parse(words[4]);
         }
     }
 }

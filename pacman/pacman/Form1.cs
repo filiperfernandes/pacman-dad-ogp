@@ -20,13 +20,15 @@ namespace pacman {
         private int gameID = 0;
         List<bool> moves = new List<bool>(new bool[4]);
 
-        public Form1(int port) {
+        public Form1(int port, Dictionary<int, List<bool>> inputFile, bool input) {
 
             //this.port = FreeTcpPort();
             this.port = port;
             ClientServices.form = this;
             TcpChannel chan = new TcpChannel(port);
             ChannelServices.RegisterChannel(chan, false);
+            ClientServices.clientMoves = inputFile;
+            ClientServices.inputFile = input;
 
             // Alternative 1 for service activation
             ClientServices servicos = new ClientServices();
@@ -104,7 +106,23 @@ namespace pacman {
 
         private void sendMovesToServer(object sender, EventArgs myEventArgs)
         {
-            this.server.AddMoves(gameID, moves);
+            
+            List<bool> movesFromFile = new List<bool>(new bool[4]);
+            //Check if has input file
+            if (ClientServices.inputFile == false) { this.server.AddMoves(gameID, moves); }
+            else
+            {
+                if (ClientServices.round <= ClientServices.clientMoves.Count)
+                {
+                    movesFromFile = ClientServices.clientMoves[ClientServices.round];
+                    ClientServices.round++;
+                    if (ClientServices.round==55) { ClientServices.inputFile = false; }
+                    this.server.AddMoves(gameID, movesFromFile);
+                }
+
+            }
+            //this.server.AddMoves(gameID, moves);
+
         }
 
         private PictureBox setGhostImage(PictureBox picture, string ghostName)
@@ -275,6 +293,10 @@ namespace pacman {
         public static bool isInitialize = false;
         List<string> messages;
         public static Boolean processing = true;
+        public static Boolean inputFile = false;
+        List<bool> movesFile ;
+        public static int round = 0;
+        public static Dictionary<int, List<bool>> clientMoves;
 
         public ClientServices()
         {
@@ -380,6 +402,12 @@ namespace pacman {
         public void Unfreeze()
         {
             ClientServices.processing = true;
+        }
+
+        public void addInputFile(Dictionary<int, List<bool>> clientMoves)
+        {
+            ClientServices.clientMoves = clientMoves;
+            ClientServices.inputFile = true;
         }
     }
 }
