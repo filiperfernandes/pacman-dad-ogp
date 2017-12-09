@@ -15,6 +15,8 @@ namespace pacman
 {
     public class PCS : MarshalByRefObject, IPCS
     {
+        static PCS pcs;
+        static TcpChannel channel;
         public static string pcs_url = "localhost";
         public static string GetLocalIPAddress()
         {
@@ -47,10 +49,10 @@ namespace pacman
             Console.WriteLine("PCS");
             Console.WriteLine(args[0]);
 
-            TcpChannel channel = new TcpChannel(11000);
+            channel = new TcpChannel(11000);
             ChannelServices.RegisterChannel(channel, false);
 
-            PCS pcs = new PCS();
+            pcs = new PCS();
             RemotingServices.Marshal(pcs, "pcs", typeof(IPCS));
 
             // Dont close console
@@ -79,6 +81,11 @@ namespace pacman
         public static string exe_path()
         {
             return @Environment.CurrentDirectory + "/PCS.exe";
+        }
+
+        public void close()
+        {
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

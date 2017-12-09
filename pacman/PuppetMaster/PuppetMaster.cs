@@ -27,6 +27,7 @@ namespace pacman
         static IPCS remote;
         static MainWindow main;
         static int server_port;
+        static int pcsAlive;
 
 
         [STAThread]
@@ -364,6 +365,21 @@ namespace pacman
             }
             else
             {
+                if (pcsAlive==1)
+                {
+                    pcsList.Remove(pcs_url);
+                    pcs.Remove(pcs_url);
+                    remote = RemotingServices.Connect(typeof(IPCS),
+                    "tcp://localhost:11000/PCS") as IPCS;
+                    try
+                    {
+                        remote.close();
+                    }
+                    catch { }
+                    
+                    //System.Threading.Thread.Sleep(5000);
+                    pcsAlive = 0;
+                }
                 ProcessStartInfo info = new ProcessStartInfo(PCS.exe_path(), pcs_url);
                 info.CreateNoWindow = false;
 
@@ -373,8 +389,9 @@ namespace pacman
                 pcsList.Add(pcs_url);
                 pcs.Add(pcs_url, remote);
 
-
+                pcsAlive = 1;
                 Process.Start(info);
+                
 
                 return pcs[pcs_url];
             }
