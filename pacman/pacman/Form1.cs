@@ -40,10 +40,13 @@ namespace pacman {
             ClientServices servicos = new ClientServices();
             RemotingServices.Marshal(servicos, "Client",
                 typeof(ClientServices));
+            try
+            {
+                this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:20001/Server");
+                this.client = (IClient)Activator.GetObject(typeof(IClient), "tcp://localhost:" + this.port + "/Client");
+            }
+            catch (Exception e) { }
 
-            this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://localhost:20001/Server");
-            //this.server = (IServer)Activator.GetObject(typeof(IServer), "tcp://1.2.3.4:20001/Server");
-            this.client = (IClient)Activator.GetObject(typeof(IClient), "tcp://localhost:" + this.port + "/Client");
             ClientServices.players = server.RegisterClient(port.ToString());
             InitializeComponent();
             label2.Visible = false;
@@ -134,10 +137,7 @@ namespace pacman {
                         this.server.AddMoves(gameID, movesFromFile);
                     } catch (Exception e) { }
                 }
-
             }
-            //this.server.AddMoves(gameID, moves);
-
         }
 
         private PictureBox setGhostImage(PictureBox picture, string ghostName)
@@ -298,7 +298,10 @@ namespace pacman {
 
         private void tbMsg_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
-                client.SendMsg("Player" + this.gameID +  ": " + this.tbMsg.Text);
+                try {
+                    client.SendMsg("Player" + this.gameID + ": " + this.tbMsg.Text);
+                }
+                catch (Exception ex) { }
                 this.tbMsg.Text = null;
                 tbMsg.Enabled = false;
             }
