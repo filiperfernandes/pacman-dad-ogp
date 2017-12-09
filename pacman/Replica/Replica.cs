@@ -16,23 +16,33 @@ namespace pacman
         public static void Main(string[] args)
         {
             string exe_path;
+            string input_file;
 
             string repl_url = args[0];
             int msec_per_round = Int32.Parse(args[1]);
             int num_players = Int32.Parse(args[2]);
             int cli = Int32.Parse(args[3]);
 
+            string args2;
+
 
             if (cli==1)
             {
-                exe_path = Client.exe_path();
+                if (args.Length > 4)
+                {
+                    input_file = args[4];
+                    args2 = repl_url + ' ' + msec_per_round + ' ' + num_players + ' ' + input_file;
+                }
+                else { args2 = repl_url + ' ' + msec_per_round + ' ' + num_players; }               
+                exe_path = Client.exe_path();               
             }
             else
             {
                 exe_path = Server.exe_path();
+                args2 = repl_url + ' ' + msec_per_round + ' ' + num_players;
             }
 
-            string args2 = repl_url + ' ' + msec_per_round + ' ' + num_players;
+            
             ProcessStartInfo info = new ProcessStartInfo(exe_path, args2);
             info.CreateNoWindow = false;
 

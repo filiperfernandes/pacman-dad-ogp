@@ -18,15 +18,22 @@ namespace pacman {
         private IClient client;
         private int port;
         private int gameID = 0;
+        //Dicionario de todas as rondas key: ronda, value: Dicionario de um PacmanObject
+        //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
+        //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY  
+        Dictionary<int, Dictionary<string, Tuple<string, int, int, int>>> allRounds =
+            new Dictionary<int, Dictionary<string, Tuple<string, int, int, int>>>();
         List<bool> moves = new List<bool>(new bool[4]);
 
-        public Form1(int port) {
+        public Form1(int port, Dictionary<int, List<bool>> inputFile, bool input) {
 
             //this.port = FreeTcpPort();
             this.port = port;
             ClientServices.form = this;
             TcpChannel chan = new TcpChannel(port);
             ChannelServices.RegisterChannel(chan, false);
+            ClientServices.clientMoves = inputFile;
+            ClientServices.inputFile = input;
 
             // Alternative 1 for service activation
             ClientServices servicos = new ClientServices();
@@ -104,7 +111,23 @@ namespace pacman {
 
         private void sendMovesToServer(object sender, EventArgs myEventArgs)
         {
-            this.server.AddMoves(gameID, moves);
+            
+            List<bool> movesFromFile = new List<bool>(new bool[4]);
+            //Check if has input file
+            if (ClientServices.inputFile == false) { this.server.AddMoves(gameID, moves); }
+            else
+            {
+                if (ClientServices.round <= ClientServices.clientMoves.Count)
+                {
+                    movesFromFile = ClientServices.clientMoves[ClientServices.round];
+                    ClientServices.round++;
+                    if (ClientServices.round==55) { ClientServices.inputFile = false; }
+                    this.server.AddMoves(gameID, movesFromFile);
+                }
+
+            }
+            //this.server.AddMoves(gameID, moves);
+
         }
 
         private PictureBox setGhostImage(PictureBox picture, string ghostName)
@@ -128,18 +151,6 @@ namespace pacman {
         private PictureBox setPacmanImage(PictureBox picture, string pacmanName)
         {
             picture.SizeMode = PictureBoxSizeMode.Zoom;
-            //if (pacmanName == "1")
-            //{
-            //    picture.Image = Properties.Resources.Left;
-            //}
-            //else if (pacmanName == "2")
-            //{
-            //    picture.Image = Properties.Resources.Left;
-            //}
-            ///*else if (pacmanName == "3")
-            //{
-            //    picture.Image = global::pacman.Properties.Resources.red_guy;
-            //}*/
             picture.Image = Properties.Resources.Left;
             return picture;
         }
@@ -155,10 +166,17 @@ namespace pacman {
             label2.Text = "GAME OVER";
         }
 
-        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList)
+        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)
         {
+            //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
+            //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY 
+            Dictionary<string, Tuple<string, int, int, int>> roundDict =
+                new Dictionary<string, Tuple<string, int, int, int>>();
             foreach (Tuple<string, string, int, int, int, int, int> pacmanObject in myList)
             {
+                roundDict.Add(pacmanObject.Item2, new Tuple<string, int, int, int>(
+                    pacmanObject.Item1, 0,
+                    pacmanObject.Item4, pacmanObject.Item5));
                 var picture = new PictureBox
                 {
                     BackColor = System.Drawing.Color.Transparent,
@@ -187,8 +205,40 @@ namespace pacman {
                 }
                 this.Controls.Add(picture);
             }
+            allRounds.Add(round, roundDict);
         }
-        
+
+        public void save_Round(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round)
+        {
+            Dictionary<string, Tuple<string, int, int, int>> roundDict =
+                new Dictionary<string, Tuple<string, int, int, int>>();
+            if (round != allRounds.Count)
+            {
+                roundDict = allRounds[allRounds.Count - 1];
+                for (int i = allRounds.Count; i < round; i++)
+                {
+                    allRounds.Add(i, roundDict);
+                }
+            }
+            //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
+            //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY 
+            roundDict = new Dictionary<string, Tuple<string, int, int, int>>();
+            foreach (Control x in this.Controls)
+            {
+                if (x is PictureBox && (string)x.Tag == "coin" || (string)x.Tag == "ghost")
+                {
+                    roundDict.Add(x.Name, new Tuple<string, int, int, int>(
+                    (string)x.Tag, 0, x.Location.X, x.Location.Y));
+                }
+                else if (x is PictureBox && (string)x.Tag == "pacman" && whatToSend.ContainsKey(x.Name))
+                {
+                    roundDict.Add(x.Name, new Tuple<string, int, int, int>(
+                    (string)x.Tag, whatToSend[x.Name].Item2, x.Location.X, x.Location.Y));
+                }
+            }
+            allRounds.Add(round, roundDict);
+        }
+
         public void timer1_Tick(Dictionary<string, Tuple<string, int, int, int>> whatToSend)
         {
             foreach (Control x in this.Controls)
@@ -200,9 +250,6 @@ namespace pacman {
                 else if (x is PictureBox && (string)x.Tag == "pacman" && whatToSend.ContainsKey(x.Name))
                 {
                     x.Location = new System.Drawing.Point(whatToSend[x.Name].Item3, whatToSend[x.Name].Item4);
-                    
-
-
                 }
                 else if (x is PictureBox && (string)x.Tag == "ghost" && whatToSend.ContainsKey(x.Name))
                 {
@@ -213,32 +260,11 @@ namespace pacman {
                     label1.Text = "Score: " + whatToSend[x.Name].Item2;
                 }
             }
+        }
 
-
-            //moving ghosts and bumping with the walls end
-            //for loop to check walls, ghosts and points
-            /*foreach (Control x in this.Controls) {
-                // checking if the player hits the wall or the ghost, then game is over
-                if (x is PictureBox && x.Tag == "wall" || x.Tag == "ghost") {
-                    if (((PictureBox)x).Bounds.IntersectsWith(pacman.Bounds)) {
-                        label2.Text = "GAME OVER";
-                        label2.Visible = true;
-                        timer1.Stop();
-                    }
-                }
-                if (x is PictureBox && x.Tag == "coin") {
-                    if (((PictureBox)x).Bounds.IntersectsWith(pacman.Bounds)) {
-                        this.Controls.Remove(x);
-                        x.Dispose();
-                        //TODO check if all coins where "eaten"
-                        //if (score == total_coins) {
-                        //    label2.Text = "GAME WON!";
-                        //    label2.Visible = true;
-                        //    timer1.Stop();
-                        //}
-                    }
-                }
-            }*/
+        public Dictionary<string, Tuple<string, int, int, int>> localState(int round)
+        {
+            return allRounds[round];
         }
 
         public void AddMsg(string s)
@@ -275,12 +301,14 @@ namespace pacman {
         }
     }
 
+    delegate Dictionary<string, Tuple<string, int, int, int>> DelLocalState(int round);
     delegate void DelAddMsg(string mensagem);
     delegate void DelSetGameID(int gameID);
     delegate void DelWinner();
     delegate void DelGameOver();
+    delegate void DelSaveRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round);
     delegate void DelDoRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend);
-    delegate void DelSetInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList);
+    delegate void DelSetInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round);
 
 
     public class ClientServices : MarshalByRefObject, IClient
@@ -290,6 +318,10 @@ namespace pacman {
         public static bool isInitialize = false;
         List<string> messages;
         public static Boolean processing = true;
+        public static Boolean inputFile = false;
+        List<bool> movesFile ;
+        public static int round = 0;
+        public static Dictionary<int, List<bool>> clientMoves;
 
         public ClientServices()
         {
@@ -345,8 +377,14 @@ namespace pacman {
                 }
             }
         }
-        
-        public void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend)
+
+        public Dictionary<string, Tuple<string, int, int, int>> localState(int round)
+        {
+            DelLocalState delLocalState = new DelLocalState(form.localState);
+            return delLocalState(round);
+        }
+
+        public void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round)
         {
             if (isInitialize)
             {
@@ -354,6 +392,7 @@ namespace pacman {
                 { 
                     form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
                 }
+                form.Invoke(new DelSaveRound(form.save_Round), whatToSend, round);
             }
             
             //DelDoRound delDoRound = new DelDoRound(form.timer1_Tick);
@@ -368,16 +407,16 @@ namespace pacman {
             form.Invoke(new DelWinner(form.Winner));
         }
 
-        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList)
+        public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)
         {
             if (isInitialize)
             {
-                form.Invoke(new DelSetInitialGame(form.setInitialGame), myList);
+                form.Invoke(new DelSetInitialGame(form.setInitialGame), myList, round);
             }
             else
             {
                 Thread.Sleep(1000);
-                setInitialGame(myList);
+                setInitialGame(myList, round);
             }
             
             //DelSetInitialGame delSetInitialGame = new DelSetInitialGame(form.setInitialGame);
@@ -403,6 +442,12 @@ namespace pacman {
         public void Unfreeze()
         {
             ClientServices.processing = true;
+        }
+
+        public void addInputFile(Dictionary<int, List<bool>> clientMoves)
+        {
+            ClientServices.clientMoves = clientMoves;
+            ClientServices.inputFile = true;
         }
     }
 }
