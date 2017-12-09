@@ -20,7 +20,7 @@ namespace pacman
         private static Timer myTimer;
         // Dictionary key: player gameID, value: moves of the player
         private static Dictionary<int, List<bool>> roundMoves;
-        private static Dictionary<int, IClient> clients;
+        public static Dictionary<int, IClient> clients;
         //public static List<int> freezeClients = new List<int>();
         private static ServerPacman game;
         private static int num_players = 2;
@@ -461,15 +461,20 @@ namespace pacman
     {
         private List<PacmanObject> objects;
         private List<PacmanObject> whatToSend;
+        private List<string> pacmanDeaths;
         private int numPlayers;
         private int boardRight;
         private int boardBottom;
         private int boardLeft;
         private int boardTop;
+        private static int biggestScore = 0;
+        private static string pacmanWinning;
+        private static int totalcoins = 56;
 
         public ServerPacman(int numPlayers)
         {
             this.objects = new List<PacmanObject>();
+            this.pacmanDeaths = new List<string>();
             this.numPlayers = numPlayers;
         }
 
@@ -554,6 +559,39 @@ namespace pacman
                 PacmanObject pacman = new PacmanObject("pacman", (i+1).ToString(), 5, 5, i*9, 25, 25);
                 this.objects.Add(pacman);
             }
+        }
+        public void CheckWinner()
+        {
+            int i = 1;
+            foreach (PacmanObject pacmanObject in this.objects)
+            {
+                if (pacmanObject is PacmanObject && pacmanObject.getTag() == "pacman")
+                {
+                    if (pacmanObject.getName().Equals(pacmanWinning))
+                    {
+                        Server.clients[Int32.Parse(pacmanWinning)].Winner();
+                    }
+                    else if (!pacmanObject.getName().Equals(pacmanWinning))
+                    {
+                        Server.clients[i].GameOver();
+                    }
+                    i++;
+                }
+            }
+            Server.processing = false;
+        }
+        public void endGame()
+        {
+            
+            if (numPlayers == pacmanDeaths.Count)
+            {
+                CheckWinner();
+            }
+            else if (totalcoins == 0)
+            {
+                CheckWinner();
+            }
+
         }
 
         public List<PacmanObject> updateGame(Dictionary<int, List<bool>> roundMoves)
@@ -648,7 +686,32 @@ namespace pacman
                                 this.whatToSend.Add(x);
                                 x.setIsAlive(false);
                                 pacmanObject.setScore(pacmanObject.getScore()+1);
+                                totalcoins-= 1;
+                                if (pacmanObject.getScore() > biggestScore)
+                                {
+                                    biggestScore = pacmanObject.getScore();
+                                    pacmanWinning = pacmanObject.getName();
+                                }
+                                if (totalcoins == 0)
+                                {
+                                    endGame();
+                                }
                             }
+                        }
+
+                        if (pacmanObject is PacmanObject && pacmanObject.getTag() == "pacman" && !pacmanObject.getIsAlive())
+                        {
+                            
+                            if (!pacmanDeaths.Contains(pacmanObject.getName()))
+                            {
+                                pacmanDeaths.Add(pacmanObject.getName());
+                            }
+                            
+                           else if(pacmanDeaths.Count == numPlayers)
+                            {
+                                endGame();
+                            }
+
                         }
                     }
                     this.whatToSend.Add(pacmanObject);
