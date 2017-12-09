@@ -115,7 +115,13 @@ namespace pacman {
             
             List<bool> movesFromFile = new List<bool>(new bool[4]);
             //Check if has input file
-            if (ClientServices.inputFile == false) { this.server.AddMoves(gameID, moves); }
+            if (ClientServices.inputFile == false) {
+                try
+                {
+                    this.server.AddMoves(gameID, moves);
+                }
+                catch (Exception e) { }
+            }
             else
             {
                 if (ClientServices.round <= ClientServices.clientMoves.Count)
@@ -123,7 +129,10 @@ namespace pacman {
                     movesFromFile = ClientServices.clientMoves[ClientServices.round];
                     ClientServices.round++;
                     if (ClientServices.round==55) { ClientServices.inputFile = false; }
-                    this.server.AddMoves(gameID, movesFromFile);
+                    try
+                    {
+                        this.server.AddMoves(gameID, movesFromFile);
+                    } catch (Exception e) { }
                 }
 
             }

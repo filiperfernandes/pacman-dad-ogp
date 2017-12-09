@@ -332,7 +332,7 @@ namespace pacman
                     {
                         if (entry.Value.Item1 == "pacman")
                         {
-                            printPM(entry.Value.Item1 + " " + entry.Value.Item3 + " " + entry.Value.Item4, src);
+                            printPM(entry.Key + " " + entry.Value.Item3 + " " + entry.Value.Item4, src);
                         }
                         else if (entry.Value.Item1 == "ghost")
                         {

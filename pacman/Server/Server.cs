@@ -7,20 +7,18 @@ using System.Collections.Generic;
 
 using RemotingInterfaces;
 using System.Diagnostics;
-using System.Runtime.Serialization.Formatters;
-using System.Collections;
-using System.Net;
 
 namespace pacman
 {
     public class Server
     {
         private Object thisLock = new Object();
+        private static Object thisLock2 = new Object();
         private static Timer enoughPlayersTimer;
         private static Timer myTimer;
         // Dictionary key: player gameID, value: moves of the player
         private static Dictionary<int, List<bool>> roundMoves;
-        public static Dictionary<int, IClient> clients;
+        public static Dictionary<int, Tuple<IClient, int>> clients = new Dictionary<int, Tuple<IClient, int>>();
         //public static List<int> freezeClients = new List<int>();
         private static ServerPacman game;
         private static int num_players = 2;
@@ -31,7 +29,6 @@ namespace pacman
         public Server(string url, int port)
         {
             roundMoves = new Dictionary<int, List<bool>>();
-            clients = new Dictionary<int, IClient>();
             ServerServices.server = this;
             TcpChannel channel = new TcpChannel(port);
 
@@ -63,7 +60,6 @@ namespace pacman
         {
             string url = args[0];
             msec_per_round = Int32.Parse(args[1]);
-            //int num_players = Int32.Parse(args[2]);
 
             char[] delimiterChars = { ':', '/' };
             string[] words = url.Split(delimiterChars);
@@ -99,20 +95,11 @@ namespace pacman
                         pacmanObject.getCurrentX(), pacmanObject.getCurrentY(),
                         pacmanObject.getObjectRectangle().Width, pacmanObject.getObjectRectangle().Height));
                 }
-                /*if (flag == 0)
-                {
-                    foreach (Tuple<string, string, int, int, int, int, int> x in myList)
-                    {
-                        Console.WriteLine("List: {0} {1} {2} {3} {4} {5} {6}", x.Item1, x.Item2, x.Item3, x.Item4, x.Item5, x.Item6, x.Item7);
-                    }
-                }
-                flag = 1;*/
                 foreach (var key in clients.Keys)
                 {
-                    ((IClient)clients[key]).setInitialGame(myList, round);
+                    ((IClient)clients[key].Item1).setInitialGame(myList, round);
                 }
                 round += 1;
-                //System.Threading.Thread.Sleep(1000);
                 myTimer = new Timer(msec_per_round);
                 myTimer.Elapsed += AtualizaJogo;
                 myTimer.AutoReset = true;
@@ -124,31 +111,46 @@ namespace pacman
         {
             if(processing)
             {
-                if (clients.Count > 0)
+                lock (thisLock2)
                 {
-                    //List of tuples with tag, name, score, xPosition and yPosition
-                    Dictionary<string, Tuple<string, int, int, int>> whatToSend =
-                        new Dictionary<string, Tuple<string, int, int, int>>();
-                    List<PacmanObject> positions = game.updateGame(roundMoves);
-                    foreach (PacmanObject pacmanObject in positions)
+                    if (clients.Count > 0)
                     {
-                        whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
-                            pacmanObject.getTag(),
-                            pacmanObject.getScore(),
-                            pacmanObject.getCurrentX(),
-                            pacmanObject.getCurrentY()));
-                    }
-                    foreach (var key in clients.Keys)
-                    {
-                        try
+                        //List of tuples with tag, name, score, xPosition and yPosition
+                        Dictionary<string, Tuple<string, int, int, int>> whatToSend =
+                            new Dictionary<string, Tuple<string, int, int, int>>();
+                        List<PacmanObject> positions = game.updateGame(roundMoves);
+                        foreach (PacmanObject pacmanObject in positions)
                         {
-                            ((IClient)clients[key]).PlayMoves(whatToSend, round);
+                            whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
+                                pacmanObject.getTag(),
+                                pacmanObject.getScore(),
+                                pacmanObject.getCurrentX(),
+                                pacmanObject.getCurrentY()));
                         }
-                        catch { }
-
+                        foreach (var key in clients.Keys)
+                        {
+                            try
+                            {
+                                ((IClient)clients[key].Item1).PlayMoves(whatToSend, round);
+                            }
+                            catch (Exception ex)
+                            {
+                                if (clients[key].Item2 > 10000)
+                                {
+                                    Console.WriteLine("Crashou1. " + key + " " + clients[key].Item2 + " " + ex.Message);
+                                    clients.Remove(key);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Crashou2. " + key + " " + clients[key].Item2 + " " + ex.Message);
+                                    clients[key] = new Tuple<IClient, int>(clients[key].Item1,
+                                        clients[key].Item2 + msec_per_round);
+                                }
+                            }
+                        }
+                        round += 1;
+                        roundMoves = new Dictionary<int, List<bool>>();
                     }
-                    round += 1;
-                    roundMoves = new Dictionary<int, List<bool>>();
                 }
             }
         }
@@ -175,7 +177,7 @@ namespace pacman
             IClient newClient =
                 (IClient)Activator.GetObject(
                        typeof(IClient), "tcp://localhost:" + NewClientName + "/Client");
-            clients.Add(gameID, newClient);
+            clients.Add(gameID, new Tuple<IClient, int>(newClient, 0));
         }
 
         public void RemoveClient(int gameID)
@@ -566,11 +568,11 @@ namespace pacman
                 {
                     if (pacmanObject.getName().Equals(pacmanWinning))
                     {
-                        Server.clients[Int32.Parse(pacmanWinning)].Winner();
+                        Server.clients[Int32.Parse(pacmanWinning)].Item1.Winner();
                     }
                     else if (!pacmanObject.getName().Equals(pacmanWinning))
                     {
-                        Server.clients[i].GameOver();
+                        Server.clients[i].Item1.GameOver();
                     }
                     i++;
                 }
