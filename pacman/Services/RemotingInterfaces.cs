@@ -19,14 +19,15 @@ namespace RemotingInterfaces
         void SendMsg(string message);
         void AddNewPlayer(string NewClientName);
         void SetGameID(int gameID);
-        void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend);
-        void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList);
+        void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round);
+        void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round);
         void Crash();
         int isAlive();
         void Freeze();
         void Unfreeze();
+        Dictionary<string, Tuple<string, int, int, int>> localState(int round);
     }
-   
+
 
     public interface IPCS
     {
@@ -39,6 +40,6 @@ namespace RemotingInterfaces
         void Unfreeze();
         void Crash(string url);
         string GlobalStatus();
-        
+
     }
 }

@@ -20,8 +20,6 @@ namespace pacman
             output_box.ReadOnly = true;
             file_box.ReadOnly = true;
         }
-
-        
         
         private void MainWindow_Load_1(object sender, EventArgs e)
         {
@@ -117,7 +115,8 @@ namespace pacman
 
         private void btn_localstate_Click(object sender, EventArgs e)
         {
-
+            String[] words = PuppetMaster.splitInputBox(input_box.Text);
+            PuppetMaster.cmdLocalState(words[0], Int32.Parse(words[1]), 0);
         }
         
 

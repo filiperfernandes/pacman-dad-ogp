@@ -287,6 +287,56 @@ namespace pacman
         static public void cmdLocalState(string pid, int round_id, int src)
         {
             printPM("LocalState of:" + pid + " on round:" + round_id, src);
+
+            string stringCutted = pidToUrl[pid].Split('/').Last();
+            Console.WriteLine(stringCutted);
+
+            char[] delimiterChars = { ':', '/' };
+            string[] words = pidToUrl[pid].Split(delimiterChars);
+
+            //Setup game settings
+            int port = Int32.Parse(words[4]);
+
+
+            if (stringCutted.Equals("Server"))
+            {
+                //IServer remote = RemotingServices.Connect(typeof(IServer),
+                //pidToUrl[pid]) as IServer;
+                IServer remote = RemotingServices.Connect(typeof(IServer),
+                    "tcp://localhost:" + port + "/Server") as IServer;
+
+                try
+                {
+                    //remote.localState(round_id);
+                }
+                catch (Exception ex) { };
+            }
+            else
+            {
+                IClient remote = RemotingServices.Connect(typeof(IClient),
+                    "tcp://localhost:" + port + "/Client") as IClient;
+                try
+                {
+                    Dictionary<string, Tuple<string, int, int, int>> round = remote.localState(round_id);
+                    printPM("round " + round_id, src);
+                    foreach (KeyValuePair<string, Tuple<string, int, int, int>> entry in round)
+                    {
+                        if (entry.Value.Item1 == "pacman")
+                        {
+                            printPM(entry.Value.Item1 + " " + entry.Value.Item3 + " " + entry.Value.Item4, src);
+                        }
+                        else if (entry.Value.Item1 == "ghost")
+                        {
+                            printPM(entry.Value.Item1 + " " + entry.Value.Item3 + " " + entry.Value.Item4, src);
+                        }
+                        else if (entry.Value.Item1 == "coin")
+                        {
+                            printPM(entry.Value.Item1 + " " + entry.Value.Item3 + " " + entry.Value.Item4, src);
+                        }
+                    }
+                }
+                catch (Exception ex) { };
+            }
         }
 
         static public void cmdWait(int x_ms, int src)
