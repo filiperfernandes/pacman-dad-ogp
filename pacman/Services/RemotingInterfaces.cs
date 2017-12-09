@@ -35,6 +35,7 @@ namespace RemotingInterfaces
 
     public interface IPCS
     {
+        void close();
         void createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, int cli, string path);
     }
 
