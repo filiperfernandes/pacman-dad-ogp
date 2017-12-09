@@ -63,9 +63,9 @@ namespace pacman
             channel = null;
         }
 
-        void IPCS.createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, int cli)
+        void IPCS.createReplica(string pid, string pcs_url, string cli_srv_url, int msec_per_round, int num_players, int cli, string path)
         {
-            string args = cli_srv_url+" "+msec_per_round+ " "+ num_players + " "+cli;
+            string args = cli_srv_url+" "+msec_per_round+ " "+ num_players + " " +cli+ " "+ path;
 
             string exe_path;
 
