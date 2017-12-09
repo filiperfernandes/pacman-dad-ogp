@@ -174,15 +174,23 @@ namespace pacman
 
         public void RegisterClient(int gameID, string NewClientName)
         {
+            try { 
             IClient newClient =
                 (IClient)Activator.GetObject(
                        typeof(IClient), "tcp://localhost:" + NewClientName + "/Client");
             clients.Add(gameID, new Tuple<IClient, int>(newClient, 0));
+            }
+            catch { }
         }
 
         public void RemoveClient(int gameID)
         {
-            clients.Remove(gameID);
+            try
+            {
+                clients.Remove(gameID);
+            }
+            catch { }
+           
         }
     }
 
@@ -568,11 +576,21 @@ namespace pacman
                 {
                     if (pacmanObject.getName().Equals(pacmanWinning))
                     {
-                        Server.clients[Int32.Parse(pacmanWinning)].Item1.Winner();
+                        try
+                        {
+                            Server.clients[Int32.Parse(pacmanWinning)].Item1.Winner();
+                        }
+                        catch { }
+                        
                     }
                     else if (!pacmanObject.getName().Equals(pacmanWinning))
                     {
-                        Server.clients[i].Item1.GameOver();
+                        try
+                        {
+                            Server.clients[i].Item1.GameOver();
+                        }
+                        catch { }
+                        
                     }
                     i++;
                 }
