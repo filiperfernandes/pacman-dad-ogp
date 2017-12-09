@@ -111,46 +111,45 @@ namespace pacman
         {
             if(processing)
             {
-                lock (thisLock2)
+                if (clients.Count > 0)
                 {
-                    if (clients.Count > 0)
+                    //List of tuples with tag, name, score, xPosition and yPosition
+                    Dictionary<string, Tuple<string, int, int, int>> whatToSend =
+                        new Dictionary<string, Tuple<string, int, int, int>>();
+                    List<PacmanObject> positions = game.updateGame(roundMoves);
+                    foreach (PacmanObject pacmanObject in positions)
                     {
-                        //List of tuples with tag, name, score, xPosition and yPosition
-                        Dictionary<string, Tuple<string, int, int, int>> whatToSend =
-                            new Dictionary<string, Tuple<string, int, int, int>>();
-                        List<PacmanObject> positions = game.updateGame(roundMoves);
-                        foreach (PacmanObject pacmanObject in positions)
-                        {
-                            whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
-                                pacmanObject.getTag(),
-                                pacmanObject.getScore(),
-                                pacmanObject.getCurrentX(),
-                                pacmanObject.getCurrentY()));
-                        }
+                        whatToSend.Add(pacmanObject.getName(), new Tuple<string, int, int, int>(
+                            pacmanObject.getTag(),
+                            pacmanObject.getScore(),
+                            pacmanObject.getCurrentX(),
+                            pacmanObject.getCurrentY()));
+                    }
+
+                    lock (thisLock2)
+                    {
                         foreach (var key in clients.Keys)
                         {
                             try
                             {
-                                ((IClient)clients[key].Item1).PlayMoves(whatToSend, round);
+                                if (clients[key].Item2 < 100)
+                                {
+                                    ((IClient)clients[key].Item1).PlayMoves(whatToSend, round);
+                                }
                             }
                             catch (Exception ex)
                             {
-                                if (clients[key].Item2 > 10000)
-                                {
-                                    Console.WriteLine("Crashou1. " + key + " " + clients[key].Item2 + " " + ex.Message);
-                                    clients.Remove(key);
-                                }
-                                else
+                                if (clients[key].Item2 < 101)
                                 {
                                     Console.WriteLine("Crashou2. " + key + " " + clients[key].Item2 + " " + ex.Message);
                                     clients[key] = new Tuple<IClient, int>(clients[key].Item1,
-                                        clients[key].Item2 + msec_per_round);
+                                           clients[key].Item2 + 1);
                                 }
                             }
                         }
-                        round += 1;
-                        roundMoves = new Dictionary<int, List<bool>>();
                     }
+                    round += 1;
+                    roundMoves = new Dictionary<int, List<bool>>();
                 }
             }
         }
