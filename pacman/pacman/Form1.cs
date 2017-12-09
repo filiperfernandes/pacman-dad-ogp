@@ -16,9 +16,13 @@ namespace pacman {
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
         private IServer server;
         private IClient client;
+        public List<string> goodMessages = new List<string>();
+        public List<string> waitMessages = new List<string>();
         private int port;
         private int gameID = 0;
         public static List<string> removedCoins = new List<string>();
+        public int[] messages = new int[2];
+        public int num_players;
         //Dicionario de todas as rondas key: ronda, value: Dicionario de um PacmanObject
         //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
         //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY  
@@ -26,9 +30,11 @@ namespace pacman {
             new Dictionary<int, Dictionary<string, Tuple<string, int, int, int>>>();
         List<bool> moves = new List<bool>(new bool[4]);
 
-        public Form1(int port, Dictionary<int, List<bool>> inputFile, bool input) {
+        public Form1(int port, Dictionary<int, List<bool>> inputFile, bool input, int num_players) {
 
             //this.port = FreeTcpPort();
+            this.num_players = num_players;
+            messages = new int[num_players];
             this.port = port;
             ClientServices.form = this;
             TcpChannel chan = new TcpChannel(port);
@@ -286,9 +292,43 @@ namespace pacman {
             return allRounds[round];
         }
 
-        public void AddMsg(string s)
+        public String GetMsg(int numbMsg)
         {
-            this.tbChat.AppendText("\r\n" + s);
+            if (numbMsg <= goodMessages.Count)
+            {
+                return goodMessages[numbMsg - 1];
+            }
+            return null;
+        }
+
+        public void AddMsg(string s, int[] messageVector)
+        {
+            messages[gameID - 1] = messages[gameID - 1] + 1;
+            int change = 0;
+            for (int i = 0; i < messages.Length; i++)
+            {
+                if (Math.Max(messages[gameID - 1], messageVector[i]) == messageVector[i])
+                {
+                    change += 1;
+                }
+                messages[gameID - 1] = Math.Max(messages[gameID - 1], messageVector[i]);
+            }
+            if (change <= 1)
+            {
+                goodMessages.Add(s);
+                this.tbChat.AppendText("\r\n" + s);
+                //this.tbChat.AppendText("\r\n" + messageVector[0] + " " + messageVector[1] + " " + change);
+            }
+            else
+            {
+                int sum = 0;
+                foreach (int val in messages)
+                {
+                    sum += val;
+                }
+                client.GetMsg(sum);
+                waitMessages.Add(s);
+            }
         }
 
         public void SetGameID(int gameID)
@@ -299,7 +339,9 @@ namespace pacman {
         private void tbMsg_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.Enter) {
                 try {
-                    client.SendMsg("Player" + this.gameID + ": " + this.tbMsg.Text);
+                    messages[gameID-1] = messages[gameID - 1] + 1;
+                    int [] time_stamp = messages;
+                    client.SendMsg("Player" + this.gameID + ": " + this.tbMsg.Text, time_stamp);
                 }
                 catch (Exception ex) { }
                 this.tbMsg.Text = null;
@@ -324,7 +366,8 @@ namespace pacman {
     }
 
     delegate Dictionary<string, Tuple<string, int, int, int>> DelLocalState(int round);
-    delegate void DelAddMsg(string mensagem);
+    delegate void DelAddMsg(string mensagem, int[] messageVector);
+    delegate String DelGetMsg(int numMsg);
     delegate void DelSetGameID(int gameID);
     delegate void DelWinner();
     delegate void DelGameOver();
@@ -351,10 +394,16 @@ namespace pacman {
             messages = new List<string>();
         }
 
-        public void MsgToClient(string mensagem)
+        public String getLostMsgFromClient(int numbMsg)
+        {
+            DelGetMsg delGetMsg = new DelGetMsg(form.GetMsg);
+            return delGetMsg(numbMsg);
+        }
+
+        public void MsgToClient(string mensagem, int[] messageVector)
         {
             // thread-safe access to form
-            form.Invoke(new DelAddMsg(form.AddMsg), mensagem);
+            form.Invoke(new DelAddMsg(form.AddMsg), mensagem, messageVector);
         }
 
         public void AddNewPlayer(string NewClientName)
@@ -371,15 +420,62 @@ namespace pacman {
             delGameID(gameID);
         }
 
-        public void SendMsg(string mensagem)
+        public String GetMsg(int numMsg)
         {
-            messages.Add(mensagem);
-            ThreadStart ts = new ThreadStart(this.BroadcastMessage);
-            Thread t = new Thread(ts);
-            t.Start();
+            string lostMsg = null;
+            new Thread(new ThreadStart(() =>
+            {
+                try
+                {
+                    lostMsg = BroadCastGetMessage(numMsg);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+            })).Start();
+            return lostMsg;
         }
 
-        private void BroadcastMessage()
+        public String BroadCastGetMessage(int numMsg)
+        {
+            String lostMsg = null;
+            for (int i = 0; i < players.Count; i++)
+            {
+                try
+                {
+                    lostMsg = ((IClient)players[i]).getLostMsgFromClient(numMsg);
+                    if(lostMsg != null)
+                    {
+                        return lostMsg;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed sending message to player. Removing client. " + e.Message);
+                    players.RemoveAt(i);
+                }
+            }
+            return lostMsg;
+        }
+
+        public void SendMsg(string mensagem, int [] messageVector)
+        {
+            messages.Add(mensagem);
+            new Thread(new ThreadStart(() =>
+            {
+                try
+                {
+                    BroadcastMessage(messageVector);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+            })).Start();
+        }
+
+        private void BroadcastMessage(int[] messageVector)
         {
             string MsgToBcast;
             lock (this)
@@ -390,7 +486,7 @@ namespace pacman {
             {
                 try
                 {
-                    ((IClient)players[i]).MsgToClient(MsgToBcast);
+                    ((IClient)players[i]).MsgToClient(MsgToBcast, messageVector);
                 }
                 catch (Exception e)
                 {

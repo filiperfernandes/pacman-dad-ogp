@@ -38,11 +38,11 @@ namespace pacman {
             if (args.Length>3)
             {
                 inputFile = parseInputFile(args[3]);
-                Application.Run(new Form1(port, inputFile, true));
+                Application.Run(new Form1(port, inputFile, true, num_players));
             }
             else {
                 inputFile = new Dictionary<int, List<bool>>() ;
-                Application.Run(new Form1(port, inputFile, false));
+                Application.Run(new Form1(port, inputFile, false, num_players));
             }
 
 

@@ -51,9 +51,7 @@ namespace pacman
             foreach (string line in lines)
             {
                 file_box.Text += line + "\r\n";
-                
             }
-
         }
 
        

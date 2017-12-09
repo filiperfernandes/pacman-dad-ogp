@@ -136,11 +136,16 @@ namespace pacman
                                 {
                                     ((IClient)clients[key].Item1).PlayMoves(whatToSend, round);
                                 }
+                            }catch (ArgumentException ex)
+                            {
+                                //Console.WriteLine("Crashou1. " + key + " " + clients[key].Item2 + " " + ex.Message);
+                                break;
                             }
                             catch (Exception ex)
                             {
                                 if (clients[key].Item2 < 101)
                                 {
+                                    //Console.WriteLine("Crashou2. " + key + " " + clients[key].Item2 + " " + ex.Message);
                                     clients[key] = new Tuple<IClient, int>(clients[key].Item1,
                                            clients[key].Item2 + 1);
                                 }

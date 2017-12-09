@@ -16,12 +16,14 @@ namespace RemotingInterfaces
 
     public interface IClient
     {
-        void MsgToClient(string message);
-        void SendMsg(string message);
+        void MsgToClient(string message, int[] messageVector);
+        void SendMsg(string message, int[] messageVector);
         void AddNewPlayer(string NewClientName);
         void SetGameID(int gameID);
         void PlayMoves(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round);
         void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round);
+        String getLostMsgFromClient(int numMsg);
+        String GetMsg(int numMsg);
         void Crash();
         int isAlive();
         void Freeze();
