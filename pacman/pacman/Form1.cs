@@ -18,6 +18,7 @@ namespace pacman {
         private IClient client;
         private int port;
         private int gameID = 0;
+        public static List<string> removedCoins = new List<string>();
         //Dicionario de todas as rondas key: ronda, value: Dicionario de um PacmanObject
         //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
         //Tuplo dos atributos: Tag, Score (caso nao seja Pacman resultado 0), posicaoX, posicaoY  
@@ -166,6 +167,11 @@ namespace pacman {
             label2.Text = "GAME OVER";
         }
 
+        public void addDeletedCoins(string entry)
+        {
+            removedCoins.Add(entry);
+        }
+
         public void setInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round)
         {
             //Dicionario de uma ronda key:PacmanObject ID, value: tuple com atributos do PacmanObject
@@ -243,6 +249,10 @@ namespace pacman {
         {
             foreach (Control x in this.Controls)
             {
+                if (removedCoins.Contains(x.Name))
+                {
+                    this.Controls.Remove(x);
+                }
                 if (x is PictureBox && (string)x.Tag == "coin" && whatToSend.ContainsKey(x.Name))
                 {
                     this.Controls.Remove(x);
@@ -309,7 +319,7 @@ namespace pacman {
     delegate void DelSaveRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend, int round);
     delegate void DelDoRound(Dictionary<string, Tuple<string, int, int, int>> whatToSend);
     delegate void DelSetInitialGame(List<Tuple<string, string, int, int, int, int, int>> myList, int round);
-
+    delegate void DelAddDeletedCoins(string entry);
 
     public class ClientServices : MarshalByRefObject, IClient
     {
@@ -391,6 +401,16 @@ namespace pacman {
                 if (ClientServices.processing)
                 { 
                     form.Invoke(new DelDoRound(form.timer1_Tick), whatToSend);
+                }
+                else
+                {
+                    foreach(KeyValuePair<string, Tuple<string, int, int, int>> entry in whatToSend)
+                    {
+                        if (entry.Value.Item1.Equals("coin"))
+                        {
+                            form.Invoke(new DelAddDeletedCoins(form.addDeletedCoins), entry.Key);
+                        }
+                    }
                 }
                 form.Invoke(new DelSaveRound(form.save_Round), whatToSend, round);
             }

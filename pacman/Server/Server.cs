@@ -466,7 +466,7 @@ namespace pacman
         private int boardTop;
         private static int biggestScore = 0;
         private static string pacmanWinning;
-        private static int totalcoins = 56;
+        private static int totalcoins = 60;
 
         public ServerPacman(int numPlayers)
         {
