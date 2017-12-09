@@ -390,6 +390,7 @@ namespace pacman
             }
             else
             {
+                Console.WriteLine(text);
                 main.output_box.AppendText(text + "\r\n");
             }
             //Console.WriteLine(text);
